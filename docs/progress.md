@@ -73,10 +73,12 @@
 - (정식 테스트 전) 개발 중 고친 것 1건: 통계 Grid가 최대 100건만 불러와 "100건"으로 표시됨 → 1,000건까지 불러오도록 수정. 심은 버그가 아니라 실제 실수였음.
 
 ### 내일(10/27) 사전 준비 — 작성자가 직접
-- [ ] 커밋 이름·이메일 설정 (`git config --global user.name / user.email`). 공개 저장소라 이메일이 노출됨 → 필요하면 GitHub noreply 주소
+- [x] 커밋 이름·이메일 설정 (Juanito, 작성자가 정한 이메일. 공개 저장소에서 커밋 이메일이 보임을 확인함)
 - [ ] GitHub 계정 준비, 빈 공개 저장소 `dice-duel-qa` 생성 (README 자동 생성 체크 해제)
 - [ ] JDK 17, Maven 설치 (화요일 오전 자동화 전까지)
 - [ ] (선택) IntelliJ IDEA Community + Cucumber for Java 플러그인
 
 ### 남은 것 / 막힌 것
-- 첫 커밋: 커밋 이름·이메일 설정 대기.
+- 첫 커밋 완료 (`main`). `.gitattributes`로 줄바꿈을 LF로 고정 (Windows에서 Docker·Jenkins 스크립트가 깨지지 않게).
+- 화면 캡처(`game-play.gif`, `stats.png`)는 화면 수정이 끝났으므로 수요일 README 작업 때 찍는다.
+- 막힌 것 없음. 화요일은 TC 확정 → 수행부터 시작.
