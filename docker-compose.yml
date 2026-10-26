@@ -1,0 +1,62 @@
+# 전체 실행: docker compose up --build
+# 게임 화면  http://localhost:8080
+# 통계 화면  http://localhost:8080/stats
+# API 문서   http://localhost:8080/docs
+# DB 직접 조회: docker compose exec db psql -U dice -d dice
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: dice
+      POSTGRES_PASSWORD: dice   # 로컬 테스트 전용 값
+      POSTGRES_DB: dice
+      TZ: Asia/Seoul
+      PGTZ: Asia/Seoul
+    volumes:
+      - ./app/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dice -d dice"]
+      interval: 3s
+      retries: 20
+
+  # API + Processor. 성능 테스트 때는 --scale app=N 으로 인스턴스 수를 늘린다.
+  app:
+    build: ./app
+    environment:
+      DATABASE_URL: postgresql://dice:dice@db:5432/dice
+      TEST_MODE: "true"   # 테스트 모드: 다음 라운드 눈 지정 API 사용 가능 (R-07)
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 3s
+      retries: 20
+
+  lb:
+    image: nginx:1.27-alpine
+    volumes:
+      - ./app/lb/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8080:80"
+    depends_on:
+      app:
+        condition: service_healthy
+
+  # 초기 데이터: DB가 비어 있을 때만 봇 매치 200개를 만들고 끝난다.
+  generator:
+    build: ./app
+    command: >
+      python generator.py --base-url http://lb --matches 200 --seed 42
+      --inject-errors 0.05 --spread-days 7 --only-if-empty
+    depends_on:
+      lb:
+        condition: service_started
+    restart: "no"
+
+volumes:
+  pgdata:

@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dice Duel 통계</title>
+<!-- Chart는 보기용이다. 자동화는 Chart 옆의 표(data-testid)로 값을 검증한다. -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  body { font-family: "Malgun Gothic", sans-serif; background: #f4f5f7; color: #222; margin: 0; }
+  header { background: #2b3a55; color: #fff; padding: 12px 20px; display: flex; justify-content: space-between; }
+  header a { color: #cfe0ff; }
+  main { max-width: 960px; margin: 20px auto; padding: 0 16px; }
+  section { background: #fff; border-radius: 8px; padding: 16px 20px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+  h2 { margin: 0 0 12px; font-size: 18px; }
+  input, button { padding: 5px 8px; font-size: 14px; }
+  /* 표: 진한 헤더, 줄무늬, 마우스를 올린 행 강조 */
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px;
+          border: 1px solid #dde3ee; border-radius: 6px; overflow: hidden; }
+  th { background: #2b3a55; color: #fff; font-weight: 600; padding: 8px 6px; position: sticky; top: 0; white-space: nowrap; }
+  td { padding: 7px 6px; border-bottom: 1px solid #eef1f6; text-align: center; }
+  tbody tr:nth-child(even) td { background: #f7f9fc; }
+  tbody tr:hover td { background: #e8f0fe; }
+  th.sortable { cursor: pointer; color: #ffd36b; }
+  th.sortable:hover { background: #3a4d70; }
+  .num { color: #7a869a; font-family: Consolas, monospace; }
+  .score { font-weight: bold; font-size: 14px; }
+  /* 배지: 결과·상태·주사위 개수를 색으로 구분 */
+  .badge { display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 12px; font-weight: 600; }
+  .b-player { background: #e3f2e6; color: #1e7b34; }
+  .b-cpu    { background: #fde7e7; color: #c62828; }
+  .b-draw   { background: #eceff1; color: #546e7a; }
+  .b-done   { background: #eceff1; color: #607d8b; }
+  .b-live   { background: #fff4d6; color: #b26a00; }
+  .b-dice2  { background: #e3edfb; color: #1f5fb4; }
+  .b-dice3  { background: #efe6fa; color: #6a3ab2; }
+  /* 분포 비교 막대: 파란 막대 = 실제 비율, 빨간 세로선 = 이론 비율 (Chart와 같은 색) */
+  .cmp { position: relative; width: 220px; height: 12px; margin: auto; background: #eef1f6; border-radius: 3px; }
+  .cmp .act { position: absolute; left: 0; top: 0; bottom: 0; background: #7aa2e3; border-radius: 3px; }
+  .cmp .thy { position: absolute; top: -3px; bottom: -3px; width: 3px; margin-left: -1px; background: #e36b6b; }
+  .diff-up   { color: #1f5fb4; font-weight: 600; }
+  .diff-down { color: #c62828; font-weight: 600; }
+  .diff-zero { color: #7a869a; }
+  #load-more { background: #2b3a55; color: #fff; border: none; border-radius: 6px; padding: 7px 24px; cursor: pointer; }
+  #load-more:hover { background: #3a4d70; }
+  .rank-1 { background: #ffe8a3; color: #8a6400; }
+  .rank-2 { background: #e6e9ee; color: #4a5568; }
+  .rank-3 { background: #f6dcc6; color: #8a4b16; }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .row > div { flex: 1; min-width: 300px; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<header>
+  <strong>📊 Dice Duel 통계</strong>
+  <a href="/" data-testid="nav-game">게임 화면</a>
+</header>
+<main>
+  <!-- S-01 매치 기록 Grid -->
+  <section>
+    <h2>매치 기록</h2>
+    <div style="margin-bottom:10px">
+      닉네임 <input data-testid="filter-nickname" id="f-nickname">
+      기간 <input type="date" data-testid="filter-from" id="f-from"> ~
+      <input type="date" data-testid="filter-to" id="f-to">
+      <button data-testid="filter-apply" id="f-apply">조회</button>
+      <span data-testid="grid-count" id="grid-count"></span>
+    </div>
+    <div>
+      <table data-testid="match-grid">
+        <thead><tr>
+          <th>매치</th>
+          <th class="sortable" data-testid="sort-created_at" data-sort="created_at">시작 시각</th>
+          <th class="sortable" data-testid="sort-nickname" data-sort="nickname">닉네임</th>
+          <th>주사위</th><th>스코어</th>
+          <th class="sortable" data-testid="sort-rounds_played" data-sort="rounds_played">라운드</th>
+          <th class="sortable" data-testid="sort-result" data-sort="result">결과</th>
+          <th>상태</th>
+        </tr></thead>
+        <tbody id="grid"></tbody>
+      </table>
+      <div style="text-align:center; margin-top:10px">
+        <button class="hidden" data-testid="load-more" id="load-more">더보기</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- S-02 합계 분포 -->
+  <section>
+    <h2>주사위 합계 분포 (이론 vs 실제)</h2>
+    <div style="margin-bottom:10px">
+      <label><input type="radio" name="dist" value="2" data-testid="dist-dice-2" checked> 2개</label>
+      <label><input type="radio" name="dist" value="3" data-testid="dist-dice-3"> 3개</label>
+      · 지금까지 던진 횟수 <span data-testid="dist-total" id="dist-total">0</span>번
+    </div>
+    <ul style="margin:0 0 10px; padding-left:20px; font-size:13px; color:#555; line-height:1.6">
+      <li><b>이론 비율</b>: 주사위가 공정하다면 그 합이 나올 확률 (예: 2개로 합 7 = 36가지 중 6가지 = 16.67%)</li>
+      <li><b>실제 비율</b>: 실제로 나온 횟수 ÷ 지금까지 던진 횟수. 많이 던질수록 이론 비율에 가까워진다</li>
+      <li><b>차이</b>: 실제 − 이론. <span class="diff-up">파랑(+)</span>은 예상보다 많이, <span class="diff-down">빨강(−)</span>은 예상보다 적게 나온 것</li>
+      <li><b>비교</b>: <span style="color:#7aa2e3">■</span> 파란 막대가 실제, <span style="color:#e36b6b">┃</span> 빨간 선이 이론. 막대 끝이 선에 가까울수록 이론과 같다</li>
+      <li>플레이어와 컴퓨터가 던진 것을 각각 1번으로 센다</li>
+    </ul>
+    <!-- Chart 위, 표 아래로 쌓아 표의 열이 좁아지지 않게 한다 -->
+    <div>
+      <div style="position:relative; height:260px; margin-bottom:14px"><canvas id="dist-chart"></canvas></div>
+      <div>
+        <table data-testid="dist-table">
+          <thead><tr><th>주사위 합계</th><th>나온 횟수</th><th>이론 비율</th><th>실제 비율</th><th>차이</th><th>비교</th></tr></thead>
+          <tbody id="dist"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- S-04 닉네임별 전적 (승률 순위) -->
+  <section>
+    <h2>닉네임별 전적 (승률 순위)</h2>
+    <ul style="margin:0 0 10px; padding-left:20px; font-size:13px; color:#555; line-height:1.6">
+      <li><b>승률</b> = 이긴 매치 ÷ 끝난 매치. 진행 중인 매치는 넣지 않는다</li>
+      <li>승률이 높은 순서, 같으면 끝난 매치가 많은 순서</li>
+    </ul>
+    <table data-testid="player-stats">
+      <thead><tr><th>순위</th><th>닉네임</th><th>전체 매치</th><th>끝난 매치</th><th>승리</th><th>승률</th></tr></thead>
+      <tbody id="players"></tbody>
+    </table>
+  </section>
+</main>
+
+<script>
+const LABEL = { PLAYER: "플레이어 승리", CPU: "컴퓨터 승리", DRAW: "무승부" };
+const $ = (id) => document.getElementById(id);
+const pct = (v) => (v * 100).toFixed(2) + "%";
+const PAGE_SIZE = 20;  // U-02: 처음 20건, 더보기를 누를 때마다 20건씩 추가
+let sort = "created_at", order = "desc", chart = null, loaded = 0;
+
+// append=false: 조회·정렬을 바꿨을 때 처음부터, append=true: 더보기
+async function loadGrid(append = false) {
+  if (!append) loaded = 0;
+  const q = new URLSearchParams({
+    nickname: $("f-nickname").value, date_from: $("f-from").value, date_to: $("f-to").value,
+    sort, order, limit: PAGE_SIZE, offset: loaded,
+  });
+  const res = await fetch(`/api/matches?${q}`);
+  const rows = await res.json();
+  const total = Number(res.headers.get("X-Total-Count"));
+  loaded += rows.length;
+  $("grid-count").textContent = `${loaded} / ${total}건`;
+  $("load-more").classList.toggle("hidden", loaded >= total);
+  // 칸의 글자는 그대로 두고 배지(span)로 감싸 색만 입힌다 → 자동화가 읽는 텍스트는 바뀌지 않는다
+  const resultCell = (r) => r ? `<span class="badge b-${r.toLowerCase()}">${LABEL[r]}</span>` : "-";
+  const statusCell = (s) => s === "FINISHED"
+    ? `<span class="badge b-done">종료</span>` : `<span class="badge b-live">진행 중</span>`;
+  const html = rows.map((m) =>
+    `<tr data-testid="match-row" data-match-id="${m.id}"><td class="num">#${m.id}</td>` +
+    `<td>${new Date(m.created_at).toLocaleString("ko-KR", { timeZone: "Asia/Seoul" })}</td>` +
+    `<td><b>${m.nickname}</b></td><td><span class="badge b-dice${m.dice_count}">${m.dice_count}개</span></td>` +
+    `<td class="score">${m.player_wins} : ${m.cpu_wins}</td>` +
+    `<td>${m.rounds_played}</td><td>${resultCell(m.result)}</td>` +
+    `<td>${statusCell(m.status)}</td></tr>`).join("");
+  if (append) $("grid").insertAdjacentHTML("beforeend", html);
+  else $("grid").innerHTML = html;
+}
+
+async function loadDistribution() {
+  const diceCount = document.querySelector("input[name=dist]:checked").value;
+  const data = await (await fetch(`/api/stats/sum-distribution?dice_count=${diceCount}`)).json();
+  $("dist-total").textContent = data.total;
+  // 비교 막대의 100% 길이 = 이론·실제 비율 중 가장 큰 값
+  const maxRatio = Math.max(...data.rows.flatMap((r) => [r.actual_ratio, r.theory_ratio]), 0.0001);
+  const diffCell = (r) => {
+    const d = (r.actual_ratio - r.theory_ratio) * 100;
+    const cls = Math.abs(d) < 0.005 ? "diff-zero" : d > 0 ? "diff-up" : "diff-down";
+    return `<td data-testid="diff" class="${cls}">${d > 0 ? "+" : ""}${d.toFixed(2)}%p</td>`;
+  };
+  const barCell = (r) =>
+    `<td><div class="cmp" title="실제 ${pct(r.actual_ratio)} / 이론 ${pct(r.theory_ratio)}">` +
+    `<div class="act" style="width:${(r.actual_ratio / maxRatio) * 100}%"></div>` +
+    `<div class="thy" style="left:${(r.theory_ratio / maxRatio) * 100}%"></div></div></td>`;
+  $("dist").innerHTML = data.rows.map((r) =>
+    `<tr data-testid="dist-row-${r.sum}"><td>${r.sum}</td><td>${r.count}</td>` +
+    `<td data-testid="theory-ratio">${pct(r.theory_ratio)}</td><td data-testid="actual-ratio">${pct(r.actual_ratio)}</td>` +
+    diffCell(r) + barCell(r) + `</tr>`).join("");
+
+  if (chart) chart.destroy();
+  chart = new Chart($("dist-chart"), {
+    data: {
+      labels: data.rows.map((r) => r.sum),
+      datasets: [
+        { type: "line", label: "이론 비율", data: data.rows.map((r) => r.theory_ratio * 100), borderColor: "#e36b6b" },
+        { type: "bar", label: "실제 비율", data: data.rows.map((r) => r.actual_ratio * 100), backgroundColor: "#7aa2e3" },
+      ],
+    },
+    options: { animation: false, maintainAspectRatio: false, scales: { y: { title: { display: true, text: "%" } } } },
+  });
+}
+
+async function loadPlayers() {
+  const rows = await (await fetch("/api/stats/players")).json();
+  // 순위는 API가 정렬한 순서 그대로. 1~3위는 메달 색 배지
+  const rankCell = (i) => i < 3
+    ? `<span class="badge rank-${i + 1}">${i + 1}</span>` : `<span class="num">${i + 1}</span>`;
+  $("players").innerHTML = rows.map((p, i) =>
+    `<tr data-testid="player-row" data-nickname="${p.nickname}"><td data-testid="rank">${rankCell(i)}</td>` +
+    `<td><b>${p.nickname}</b></td><td>${p.total_matches}</td>` +
+    `<td>${p.finished_matches}</td><td>${p.wins}</td><td data-testid="win-rate" class="score">${pct(p.win_rate)}</td></tr>`).join("");
+}
+
+// 현재 정렬 열에 ▲(오름)·▼(내림) 표시. aria-sort는 자동화가 정렬 상태를 읽는 데 쓴다.
+function updateSortMarks() {
+  document.querySelectorAll("th.sortable").forEach((th) => {
+    const active = th.dataset.sort === sort;
+    th.dataset.label = th.dataset.label || th.textContent;
+    th.textContent = th.dataset.label + (active ? (order === "asc" ? " ▲" : " ▼") : "");
+    th.setAttribute("aria-sort", active ? (order === "asc" ? "ascending" : "descending") : "none");
+  });
+}
+
+document.querySelectorAll("th.sortable").forEach((th) => {
+  th.onclick = () => {
+    order = sort === th.dataset.sort && order === "desc" ? "asc" : "desc";
+    sort = th.dataset.sort;
+    updateSortMarks();
+    loadGrid();
+  };
+});
+updateSortMarks();
+$("f-apply").onclick = () => loadGrid();
+$("load-more").onclick = () => loadGrid(true);
+document.querySelectorAll("input[name=dist]").forEach((r) => (r.onchange = loadDistribution));
+
+loadGrid();
+loadDistribution();
+loadPlayers();
+</script>
+</body>
+</html>

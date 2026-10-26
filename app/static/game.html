@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dice Duel</title>
+<!-- 자동화용 selector는 모두 data-testid로 잡는다. 화면은 canvas 없이 DOM 요소로만 그린다. -->
+<style>
+  body { font-family: "Malgun Gothic", sans-serif; background: #f4f5f7; color: #222; margin: 0; }
+  header { background: #2b3a55; color: #fff; padding: 12px 20px; display: flex; justify-content: space-between; }
+  header a { color: #cfe0ff; }
+  main { max-width: 640px; margin: 20px auto; padding: 0 16px; }
+  section { background: #fff; border-radius: 8px; padding: 16px 20px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+  h2 { margin: 0 0 12px; font-size: 18px; }
+  input[type=text] { padding: 6px 8px; font-size: 15px; width: 180px; }
+  button { padding: 8px 16px; font-size: 15px; cursor: pointer; }
+  button:disabled { cursor: not-allowed; opacity: .5; }
+  .error { color: #c62828; margin-top: 8px; min-height: 1em; }
+  .side { display: inline-block; width: 45%; vertical-align: top; text-align: center; }
+  /* 주사위: 3x3 칸에 점(pip)을 찍는다. 눈 값은 data-value 속성으로 읽는다 (자동화용). */
+  .die { display: inline-grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);
+         width: 44px; height: 44px; padding: 5px; margin: 4px; box-sizing: border-box;
+         border: 2px solid #333; border-radius: 8px; background: #fff; vertical-align: middle; }
+  .pip { width: 8px; height: 8px; margin: auto; border-radius: 50%; }
+  .pip.on { background: #d32f2f; }
+  /* 던지기 애니메이션: 굴리는 동안 주사위가 흔들리며 회전한다 */
+  @keyframes roll {
+    0%   { transform: rotate(0deg)   translateY(0); }
+    25%  { transform: rotate(90deg)  translateY(-6px); }
+    50%  { transform: rotate(180deg) translateY(0); }
+    75%  { transform: rotate(270deg) translateY(-6px); }
+    100% { transform: rotate(360deg) translateY(0); }
+  }
+  .die.rolling { animation: roll 0.35s linear infinite; }
+  .result { font-size: 20px; font-weight: bold; text-align: center; margin-top: 12px; }
+  .score { font-size: 28px; text-align: center; }
+  .final { font-size: 22px; font-weight: bold; text-align: center; color: #2b3a55; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { border-bottom: 1px solid #ddd; padding: 4px; text-align: center; }
+  .hidden { display: none; }
+  .rules ol { margin: 0; padding-left: 20px; line-height: 1.7; font-size: 14px; }
+  .rules b { color: #2b3a55; }
+</style>
+</head>
+<body>
+<header>
+  <strong>🎲 Dice Duel</strong>
+  <a href="/stats" data-testid="nav-stats">통계 화면</a>
+</header>
+<main>
+  <!-- 0. 게임 규칙 (U-01). 문구는 docs/01-requirements.md의 R-01~R-06과 맞춘다 -->
+  <section class="rules" data-testid="rules">
+    <h2>게임 규칙</h2>
+    <ol>
+      <li data-testid="rule-1">플레이어와 컴퓨터가 같은 개수의 주사위를 던져 <b>합이 큰 쪽</b>이 라운드를 이깁니다.</li>
+      <li data-testid="rule-2">합이 같으면 <b>모든 눈이 같은 쪽</b>(2개는 더블, 3개는 트리플)이 이깁니다. 둘 다 같거나 둘 다 아니면 무승부입니다.</li>
+      <li data-testid="rule-3"><b>먼저 3라운드를 이기면</b> 매치 승리입니다. 무승부 라운드는 승수에 들어가지 않습니다.</li>
+      <li data-testid="rule-4"><b>10라운드</b>까지 3승이 없으면 승수가 많은 쪽이 이기고, 같으면 매치 무승부입니다.</li>
+      <li data-testid="rule-5">닉네임은 <b>2~10자</b>의 한글·영문·숫자, 주사위 개수(2개·3개)는 매치 시작 전에만 고를 수 있습니다.</li>
+    </ol>
+  </section>
+
+  <!-- 1. 매치 시작 -->
+  <section data-testid="start-section">
+    <h2>매치 시작</h2>
+    <label>닉네임 <input type="text" data-testid="nickname-input" id="nickname" placeholder="2~10자"></label>
+    <div style="margin-top:8px">
+      주사위 개수
+      <label><input type="radio" name="dice" value="2" data-testid="dice-count-2" checked> 2개</label>
+      <label><input type="radio" name="dice" value="3" data-testid="dice-count-3"> 3개</label>
+    </div>
+    <div style="margin-top:12px"><button data-testid="start-button" id="start">매치 시작</button></div>
+    <div class="error" data-testid="start-error" id="start-error"></div>
+  </section>
+
+  <!-- 2. 매치 진행 -->
+  <!-- data-rolling: 던지기 애니메이션 중이면 "true". 자동화는 "false"가 될 때까지 기다린 뒤 결과를 읽는다 -->
+  <section class="hidden" data-testid="match-section" id="match-section" data-rolling="false">
+    <h2>매치 #<span data-testid="match-id" id="match-id"></span>
+      · <span data-testid="match-nickname" id="match-nickname"></span>
+      · 라운드 <span data-testid="round-no" id="round-no">0</span>/10</h2>
+    <div class="score" data-testid="score" id="score">0 : 0</div>
+    <div>
+      <div class="side">
+        <div>플레이어</div>
+        <div data-testid="player-dice" id="player-dice"></div>
+        <div>합계 <span data-testid="player-sum" id="player-sum">-</span></div>
+      </div>
+      <div class="side">
+        <div>컴퓨터</div>
+        <div data-testid="cpu-dice" id="cpu-dice"></div>
+        <div>합계 <span data-testid="cpu-sum" id="cpu-sum">-</span></div>
+      </div>
+    </div>
+    <div class="result" data-testid="round-result" id="round-result"></div>
+    <div style="text-align:center; margin-top:12px">
+      <button data-testid="throw-button" id="throw">던지기</button>
+    </div>
+    <div class="error" data-testid="throw-error" id="throw-error"></div>
+    <div class="final hidden" data-testid="match-result" id="match-result"></div>
+    <div style="text-align:center; margin-top:8px">
+      <button class="hidden" data-testid="new-match-button" id="new-match">새 매치</button>
+    </div>
+  </section>
+
+  <!-- 3. 라운드 기록 -->
+  <section class="hidden" id="history-section">
+    <h2>라운드 기록</h2>
+    <table data-testid="round-history">
+      <thead><tr><th>라운드</th><th>플레이어</th><th>컴퓨터</th><th>결과</th></tr></thead>
+      <tbody id="history"></tbody>
+    </table>
+  </section>
+</main>
+
+<script>
+const LABEL = { PLAYER: "플레이어 승리", CPU: "컴퓨터 승리", DRAW: "무승부" };
+let match = null;
+
+const $ = (id) => document.getElementById(id);
+
+async function api(method, url, body) {
+  const res = await fetch(url, {
+    method, headers: { "Content-Type": "application/json" },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || "요청에 실패했습니다.");
+  return data;
+}
+
+// 눈별로 점을 찍을 칸 (3x3 칸, 왼쪽 위부터 0~8)
+const PIPS = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
+
+// 애니메이션 시간. 주소 끝에 ?noanim 을 붙이면 0 (자동화를 빠르게 돌릴 때)
+const ROLL_MS = new URLSearchParams(location.search).has("noanim") ? 0 : 1200;
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const randomFace = () => 1 + Math.floor(Math.random() * 6);
+
+// rolling=true 이면 굴리는 중인 가짜 눈이다. data-value를 비워 자동화가 잘못 읽지 않게 한다.
+function renderDice(containerId, dice, prefix, rolling = false) {
+  $(containerId).innerHTML = dice.map((d, i) => {
+    const pips = [...Array(9).keys()].map((k) => `<span class="pip${PIPS[d].includes(k) ? " on" : ""}"></span>`).join("");
+    return `<span class="die${rolling ? " rolling" : ""}" data-testid="${prefix}-die-${i + 1}"` +
+      ` data-value="${rolling ? "" : d}" aria-label="${rolling ? "굴리는 중" : d}">${pips}</span>`;
+  }).join("");
+}
+
+// 결과를 기다리는 동안 무작위 눈을 바꿔 가며 굴린다. 끝나면 정지 함수를 돌려준다.
+function startRolling(diceCount) {
+  $("match-section").dataset.rolling = "true";
+  $("round-result").textContent = "굴리는 중...";
+  $("player-sum").textContent = $("cpu-sum").textContent = "?";
+  const tick = () => {
+    renderDice("player-dice", Array.from({ length: diceCount }, randomFace), "player", true);
+    renderDice("cpu-dice", Array.from({ length: diceCount }, randomFace), "cpu", true);
+  };
+  tick();
+  const timer = setInterval(tick, 90);
+  return () => { clearInterval(timer); $("match-section").dataset.rolling = "false"; };
+}
+
+function render() {
+  $("match-id").textContent = match.id;
+  $("match-nickname").textContent = match.nickname;
+  $("round-no").textContent = match.rounds_played;
+  $("score").textContent = `${match.player_wins} : ${match.cpu_wins}`;
+
+  const last = match.rounds[match.rounds.length - 1];
+  if (last) {
+    renderDice("player-dice", last.player_dice, "player");
+    renderDice("cpu-dice", last.cpu_dice, "cpu");
+    $("player-sum").textContent = last.player_sum;
+    $("cpu-sum").textContent = last.cpu_sum;
+    $("round-result").textContent = LABEL[last.result];
+  } else {
+    $("player-dice").innerHTML = $("cpu-dice").innerHTML = "";
+    $("player-sum").textContent = $("cpu-sum").textContent = "-";
+    $("round-result").textContent = "";
+  }
+
+  $("history").innerHTML = match.rounds.map((r) =>
+    `<tr data-testid="history-row"><td>${r.round_no}</td><td>${r.player_dice.join(", ")} (${r.player_sum})</td>` +
+    `<td>${r.cpu_dice.join(", ")} (${r.cpu_sum})</td><td>${LABEL[r.result]}</td></tr>`).join("");
+
+  const finished = match.status === "FINISHED";
+  $("throw").disabled = finished;  // R-08
+  $("match-result").classList.toggle("hidden", !finished);
+  $("new-match").classList.toggle("hidden", !finished);
+  if (finished) $("match-result").textContent = `매치 종료 · ${LABEL[match.result]}`;
+}
+
+$("start").onclick = async () => {
+  $("start-error").textContent = "";
+  const diceCount = Number(document.querySelector("input[name=dice]:checked").value);
+  try {
+    match = await api("POST", "/api/matches", { nickname: $("nickname").value, dice_count: diceCount });
+  } catch (e) {
+    $("start-error").textContent = e.message;
+    return;
+  }
+  $("start").disabled = true;
+  $("match-section").classList.remove("hidden");
+  $("history-section").classList.remove("hidden");
+  $("throw-error").textContent = "";
+  render();
+};
+
+$("throw").onclick = async () => {
+  $("throw-error").textContent = "";
+  $("throw").disabled = true;
+  const stopRolling = ROLL_MS ? startRolling(match.dice_count) : () => {};
+  // 서버 요청과 애니메이션을 동시에 시작하고, 둘 다 끝나면 결과를 보여준다
+  const request = api("POST", `/api/matches/${match.id}/throw`, { round_no: match.rounds_played + 1 })
+    .then((data) => { match = data; })
+    .catch((e) => { $("throw-error").textContent = e.message; });
+  await Promise.all([request, sleep(ROLL_MS)]);
+  stopRolling();
+  $("throw").disabled = false;
+  render();
+};
+
+$("new-match").onclick = () => {
+  match = null;
+  $("start").disabled = false;
+  $("match-section").classList.add("hidden");
+  $("history-section").classList.add("hidden");
+};
+</script>
+</body>
+</html>
