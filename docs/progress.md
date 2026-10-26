@@ -72,10 +72,11 @@
 
 ### 내일(10/27) 사전 준비 — 작성자가 직접
 - [x] 커밋 이름·이메일 설정 (Juanito, 작성자가 정한 이메일. 공개 저장소에서 커밋 이메일이 보임을 확인함)
+작성자 결정: 아래 설치·계정 준비는 화요일 작업을 시작하면서 함께 진행한다.
 - [ ] GitHub 계정 준비, 빈 공개 저장소 `dice-duel-qa` 생성 ("Add a README file" 체크 해제)
-- [ ] JDK 17, Maven 설치 (화요일 오전 자동화 전까지)
-- [ ] (선택) IntelliJ IDEA Community + Cucumber for Java 플러그인
-- [ ] 아침에 Docker Desktop 실행
+- [ ] JDK 17, Maven 설치 (자동화 전까지)
+- [ ] IDE: **VS Code** 예정 (작성자 검토 중) → Extension Pack for Java, Cucumber 확장
+- [ ] Docker Desktop 실행 후 `docker compose up -d` (컨테이너는 10/26 작업 후 종료함. DB 데이터는 볼륨에 그대로 있어 초기 데이터를 다시 만들지 않음)
 
 ### 화요일 시작 순서
 1. TC 초안 확정 (`02-test-cases.md`) → 유저 시나리오 작성
