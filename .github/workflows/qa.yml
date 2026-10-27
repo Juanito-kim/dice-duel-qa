@@ -1,0 +1,83 @@
+# QA 파이프라인: 앱 기동 → Sanity → Cucumber 회귀 → 결과 판정 → 리포트 공개(GitHub Pages)
+# 판정 기준: 실패한 시나리오가 모두 알려진 결함(@BUG-xxx)이면 통과, 새로운 실패가 있으면 빌드 실패
+name: QA
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: qa-pages
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 앱 실행 (docker compose)
+        run: docker compose up -d --build
+
+      - name: 앱·초기 데이터 준비 대기
+        run: |
+          for i in $(seq 1 60); do curl -sf http://localhost:8080/health && break; sleep 2; done
+          docker compose wait generator || true
+          docker compose ps -a
+
+      - name: Sanity test
+        run: |
+          bash scripts/sanity.sh | tee sanity.txt
+          { echo '### Sanity'; echo '```'; cat sanity.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Cucumber 회귀 (Selenium, headless Chrome)
+        working-directory: automation
+        continue-on-error: true   # 알려진 결함 FAIL은 정상. 판정은 다음 단계에서 한다
+        run: mvn -B test -Dheadless=true
+
+      - name: 결과 판정 (알려진 결함 외 실패가 없는가)
+        shell: bash
+        run: |
+          python3 scripts/known_failures.py automation/target/cucumber-report/cucumber.json | tee -a "$GITHUB_STEP_SUMMARY"
+          exit ${PIPESTATUS[0]}
+
+      - name: app log 보관
+        if: always()
+        run: docker compose logs --no-color app > app.log
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: qa-logs
+          path: |
+            sanity.txt
+            app.log
+
+      - name: 리포트를 Pages용으로 올림
+        if: always()
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: automation/target/cucumber-report
+
+  report:
+    needs: test
+    if: always() && needs.test.result != 'cancelled'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
