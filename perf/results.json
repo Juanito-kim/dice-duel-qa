@@ -1,0 +1,74 @@
+[
+  {
+    "instances": 1,
+    "requests": 5552,
+    "elapsed_sec": 29.51,
+    "throughput_rps": 188.1,
+    "latency_avg_ms": 105.9,
+    "latency_p95_ms": 143.4,
+    "latency_max_ms": 201.7,
+    "errors": 0,
+    "per_instance": [
+      5552
+    ],
+    "app_cpu_peak_sum_pct": 169.0,
+    "db_cpu_peak_pct": 19.7,
+    "app_mem": {
+      "app-1": "44.44MiB"
+    },
+    "dup_pairs": 100,
+    "dup_exactly_one_ok": 100,
+    "dup_split_across_instances": 0,
+    "dup_db_duplicates": 0
+  },
+  {
+    "instances": 2,
+    "requests": 5547,
+    "elapsed_sec": 15.23,
+    "throughput_rps": 364.2,
+    "latency_avg_ms": 54.6,
+    "latency_p95_ms": 128.0,
+    "latency_max_ms": 158.6,
+    "errors": 0,
+    "per_instance": [
+      2761,
+      2786
+    ],
+    "app_cpu_peak_sum_pct": 237.5,
+    "db_cpu_peak_pct": 36.9,
+    "app_mem": {
+      "app-2": "43.38MiB",
+      "app-1": "43.92MiB"
+    },
+    "dup_pairs": 100,
+    "dup_exactly_one_ok": 100,
+    "dup_split_across_instances": 97,
+    "dup_db_duplicates": 0
+  },
+  {
+    "instances": 3,
+    "requests": 5463,
+    "elapsed_sec": 10.23,
+    "throughput_rps": 533.8,
+    "latency_avg_ms": 37.2,
+    "latency_p95_ms": 119.2,
+    "latency_max_ms": 169.7,
+    "errors": 0,
+    "per_instance": [
+      1816,
+      1817,
+      1830
+    ],
+    "app_cpu_peak_sum_pct": 308.9,
+    "db_cpu_peak_pct": 53.2,
+    "app_mem": {
+      "app-3": "57.17MiB",
+      "app-2": "43.11MiB",
+      "app-1": "45.12MiB"
+    },
+    "dup_pairs": 100,
+    "dup_exactly_one_ok": 100,
+    "dup_split_across_instances": 99,
+    "dup_db_duplicates": 0
+  }
+]
