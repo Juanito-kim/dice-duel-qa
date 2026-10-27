@@ -29,6 +29,19 @@
 | RG-09 | 핵심 기능 | 빌드 직후 Sanity 11항목 | SN-01~11 | 높음 | 스크립트 | [`scripts/sanity.sh`](../scripts/sanity.sh) |
 | RG-10 | [SPEC-001](05-defects/SPEC-001.md) · [SPEC-002](05-defects/SPEC-002.md) | PO 결정 후 규칙(R-10, S-01 보완)에 맞춰 TC 작성 | G01, F04 | 결정 후 | — | (PO 결정 대기) |
 
+## 자동화 결과 (2026-10-27)
+
+RG-01~RG-06을 Cucumber feature 4개, 시나리오 19개로 자동화했다. 결과는 아래 "기대 상태"와 정확히 일치했다.
+
+| 실행 | 결과 | 판정 |
+|---|---|---|
+| 로컬 (Chrome headless) | PASS 15 · FAIL 4 (모두 `@BUG-xxx`) | 새 실패 0 → 통과 |
+| GitHub Actions | [실행 기록](https://github.com/Juanito-kim/dice-duel-qa/actions/workflows/qa.yml) · [Cucumber 리포트](https://juanito-kim.github.io/dice-duel-qa/) | 아래 "판정 규칙" |
+| Jenkins (Docker, 원격 Chrome) | [Jenkinsfile](../jenkins/Jenkinsfile) | 아래 "판정 규칙" |
+
+판정 규칙: 실패한 시나리오가 모두 알려진 결함(`@BUG-xxx`)이면 통과, 아니면 빌드 실패 ([known_failures.py](../scripts/known_failures.py)).
+v1.0은 결함을 고치지 않고 릴리스 판단 자료로 쓰므로, CI의 역할은 **새로 깨진 것만 막는 것**이다. RG-07은 [log 모니터링](../monitoring/README.md), RG-08은 [성능 측정](../perf/report.md), RG-09는 [sanity.sh](../scripts/sanity.sh)로 수행했다.
+
 ## 결함 수정 전의 기대 상태
 
 v1.0은 결함을 고치지 않고 릴리스 판단 자료로 쓰므로, 지금 돌리면 아래 시나리오는 **FAIL이 정상**이다. 자동화 리포트에서 FAIL이 이 결함들과 정확히 일치하는지 확인한다.

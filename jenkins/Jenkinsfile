@@ -23,7 +23,7 @@ pipeline {
         stage('Regression (전체)') {
             steps {
                 // 알려진 결함(@BUG-xxx) FAIL은 정상이므로 여기서는 멈추지 않고, 다음 단계에서 판정한다
-                dir('automation') { sh 'mvn -B -q test || true' }
+                dir('automation') { sh 'mvn -B -q test -Dmaven.test.failure.ignore=true' }
             }
         }
         stage('Gate (알려진 결함 외 실패 없음)') {

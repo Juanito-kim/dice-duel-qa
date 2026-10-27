@@ -95,7 +95,7 @@
 | TC-D01 | PASS | API | seed 777777 매치 2개, 4라운드 눈이 모두 같음 (1라운드 [6,4] vs [2,6]) |
 | TC-D02 | PASS | API | `TEST_MODE=false` 인스턴스에서 눈 지정 → 403, WARNING log |
 | TC-E01 | PASS | API·log | 같은 라운드 재요청 → 409, rounds_played 1 유지, `WARNING … duplicate round` |
-| ★ TC-E02 | PASS | API·DB | 동시 요청 2건 × 100회 → 100회 모두 1건만 200, DB 중복 라운드 0건 (부하 상황은 TC-004에서 재확인) |
+| ★ TC-E02 | PASS | API·DB | 동시 요청 2건 × 100회 → 100회 모두 1건만 200, DB 중복 라운드 0건 (부하 중 300쌍은 [TC-004](../perf/report.md)에서 재확인: 모두 1건만 처리) |
 
 ### F. 통계
 
@@ -136,4 +136,4 @@
 
 - 차단(Blocker)·치명(Critical) 결함 없음. **Major 3건은 v1.0 릴리스 전 수정이 필요**하다 (판정 결과·통계 수치 오류).
 - SPEC 이슈 2건은 PO 결정 대기. v1.0은 현행 유지.
-- FAIL·BLOCKED TC는 [회귀 시나리오](06-regression.md)에 등록한다.
+- FAIL·BLOCKED TC는 [회귀 시나리오](06-regression.md)에 등록하고 Cucumber로 자동화했다 (19 시나리오: PASS 15, 알려진 결함 FAIL 4).
