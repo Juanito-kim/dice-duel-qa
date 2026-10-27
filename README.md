@@ -30,6 +30,8 @@
 
 > 결함 BUG-001~003은 결함 리포트를 보여주기 위해 미리 심은 것이며 [planted-bugs.md](docs/planted-bugs.md)에 위치와 의도를 공개했습니다. BUG-004, SPEC-001, SPEC-002는 테스트하며 실제로 발견한 것입니다.
 
+모든 실행 기록(Sanity, Cucumber 리포트, Jenkins 콘솔, log 모니터, 성능 결과)은 [docs/reports/](docs/reports/README.md)에 날짜별로 모여 있습니다.
+
 ## 화면
 
 ![매치 한 판](docs/images/game-play.gif)
@@ -81,7 +83,8 @@ Generator (봇 매치) ──┘                    │
 | 폴더 | 내용 |
 |---|---|
 | `app/` | 제품: API·판정 로직(Python FastAPI), 게임·통계 화면, DB 스키마, 봇 매치 Generator |
-| `docs/` | 명세, 테스트 케이스, 유저 시나리오, 설치, Sanity, 결과, 결함·명세 이슈, 회귀, 캡처, 실행 기록 |
+| `docs/` | 명세, 테스트 케이스, 유저 시나리오, 설치, Sanity, 결과, 결함·명세 이슈, 회귀, 캡처 |
+| `docs/reports/` | **테스트 실행 리포트 모음**: Sanity, 기능 검증, Cucumber 리포트(Actions·Jenkins), log 모니터링, 성능 결과의 원본 |
 | `automation/` | Cucumber(Gherkin) + Selenium WebDriver (Java, Maven), Page Object |
 | `.github/workflows/` · `jenkins/` | CI: GitHub Actions (공개 결과) · Jenkins (Docker) |
 | `monitoring/` | log 수집·ERROR 필터링 스크립트 |

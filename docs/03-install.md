@@ -2,7 +2,7 @@
 
 > Part 1 · TC-002 · 03 환경 구성·설치
 > 수행: 2026-10-27 · 수행자: 김성환 · 결과: **설치 성공** (빌드·기동 19초)
-> 원본 실행 기록: [evidence/03-install-run.txt](evidence/03-install-run.txt)
+> 원본 실행 기록: [reports/01-install/2026-10-27_clean-install.txt](reports/01-install/2026-10-27_clean-install.txt)
 
 ## 1. 테스트 환경
 

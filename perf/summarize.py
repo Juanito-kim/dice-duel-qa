@@ -1,4 +1,4 @@
-"""perf/raw의 원본 결과를 요약(perf/results.json)하고 Chart(docs/images/tc004-chart.png)를 그린다.
+"""perf/raw의 원본 결과를 요약(docs/reports/06-performance/2026-10-27_results.json)하고 Chart(docs/images/tc004-chart.png)를 그린다.
 
 실행 (Pillow와 한글 글꼴이 필요해 컨테이너에서):
   docker run --rm -v "<저장소>:/repo" -v "C:\\Windows\\Fonts:/fonts:ro" -w /repo python:3.12-slim \
@@ -33,7 +33,7 @@ for n in N:
         "dup_pairs": dup["pairs"], "dup_exactly_one_ok": dup["exactly_one_ok"],
         "dup_split_across_instances": dup["pairs_split_across_instances"], "dup_db_duplicates": dup["db_duplicate_rounds"],
     })
-json.dump(results, open("perf/results.json", "w"), ensure_ascii=False, indent=2)
+json.dump(results, open("docs/reports/06-performance/2026-10-27_results.json", "w"), ensure_ascii=False, indent=2)
 for r in results:
     print(r)
 

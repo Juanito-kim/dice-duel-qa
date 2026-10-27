@@ -1,0 +1,12 @@
+Sanity 2026-10-27 05:41:53 target=http://host.docker.internal:8080
+SKIP  SN-01  db·app 컨테이너 healthy  [docker 없음]
+PASS  SN-02  /health 응답 ok  [{"status":"ok","instance":"964d2669e80f","test_mode":true}]
+PASS  SN-03  게임 화면: 규칙·닉네임·시작·던지기 요소  [4/4]
+PASS  SN-04  매치 시작 (유효한 닉네임)  [match id=201]
+PASS  SN-05  던지기 1회 → 라운드 1 기록  [rounds_played=1]
+SKIP  SN-06  매치 조회 API = DB  [docker 없음]
+PASS  SN-07  통계 화면 200, 매치 목록 있음  [stats=200 total=201]
+PASS  SN-08  합계 분포 2개 11행·3개 16행  [2개=11 3개=16]
+PASS  SN-09  닉네임별 전적 응답 (봇 10명 이상)  [players=12]
+SKIP  SN-10  처리 log에 방금 라운드가 찍힘  [docker 없음]
+RESULT pass=7 fail=0 skip=3

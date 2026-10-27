@@ -1,7 +1,7 @@
 # TC-004 성능 측정 결과 — Dice Duel v1.0
 
 > Part 1 · TC-004 · 01~06 · 수행: 2026-10-27 14:25~14:27 · 수행자: 김성환
-> 스크립트: [run_perf.sh](run_perf.sh) · [dup_under_load.py](dup_under_load.py) · [summarize.py](summarize.py) · 요약 데이터: [results.json](results.json)
+> 스크립트: [run_perf.sh](run_perf.sh) · [dup_under_load.py](dup_under_load.py) · [summarize.py](summarize.py) · 요약 데이터: [results.json](../docs/reports/06-performance/2026-10-27_results.json)
 
 ## 1. 목적
 
@@ -82,4 +82,4 @@ bash perf/run_perf.sh
 docker run --rm -v "%cd%:/repo" -v "C:\Windows\Fonts:/fonts:ro" -w /repo python:3.12-slim sh -c "pip install -q pillow && python perf/summarize.py"
 ```
 
-원본 결과(`perf/raw/`)는 실행할 때마다 새로 만들어져 저장소에 넣지 않는다. 요약은 [results.json](results.json)에 있다.
+원본 결과(`perf/raw/`)는 실행할 때마다 새로 만들어져 저장소에 넣지 않는다. 요약은 [results.json](../docs/reports/06-performance/2026-10-27_results.json)에 있다.

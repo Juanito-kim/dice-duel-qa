@@ -1,6 +1,6 @@
 # Log 모니터링 — TC-003 · Server (05 수집, 06 ERROR 필터링)
 
-> 수행: 2026-10-27 · 스크립트: [log_monitor.py](log_monitor.py) · 원본 실행 기록: [../docs/evidence/tc003-monitor-run.txt](../docs/evidence/tc003-monitor-run.txt)
+> 수행: 2026-10-27 · 스크립트: [log_monitor.py](log_monitor.py) · 원본 실행 기록: [../docs/reports/05-log-monitoring/2026-10-27_monitor-run.txt](../docs/reports/05-log-monitoring/2026-10-27_monitor-run.txt)
 
 ## 구조
 

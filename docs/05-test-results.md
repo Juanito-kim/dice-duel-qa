@@ -2,7 +2,7 @@
 
 > Part 1 · TC-002 · 05 기능 검증·결함 리포트
 > 수행: 2026-10-27 13:44~13:48 · 수행자: 김성환 · 빌드: `main` · 환경: [03-install.md](03-install.md) · 선행: [Sanity PASS](04-sanity.md)
-> 테스트 케이스: [02-test-cases.md](02-test-cases.md) · 원본 기록: [evidence/](evidence/)
+> 테스트 케이스: [02-test-cases.md](02-test-cases.md) · 원본 기록: [reports/](reports/)
 
 ## 요약
 

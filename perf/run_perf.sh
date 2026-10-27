@@ -2,7 +2,7 @@
 # TC-004 성능 측정: app 인스턴스 1·2·3개에서 같은 부하(봇 매치 동시 실행)를 주고 결과를 모은다.
 #   부하: Generator 매치 1,000개, 동시 20개 (약 5,500 요청). 동시 중복 던지기 확인이 부하 중에 끝나도록 충분히 길게
 #   측정: 처리량·응답 시간(Generator 요약), CPU·메모리(docker stats 2초 간격), 동시 중복 던지기(부하 중)
-# 사용: bash perf/run_perf.sh      결과: perf/raw/ (원본), perf/results.json (요약)
+# 사용: bash perf/run_perf.sh      결과: perf/raw/ (원본), docs/reports/06-performance/ (요약)
 set -u
 cd "$(dirname "$0")/.."
 mkdir -p perf/raw

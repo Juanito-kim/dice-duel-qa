@@ -37,7 +37,7 @@ RG-01~RG-06을 Cucumber feature 4개, 시나리오 19개로 자동화했다. 결
 |---|---|---|
 | 로컬 (Chrome headless) | PASS 15 · FAIL 4 (모두 `@BUG-xxx`) | 새 실패 0 → 통과 |
 | GitHub Actions | Sanity 10/10 → PASS 15 · FAIL 4 (모두 `@BUG-xxx`) · [실행 기록](https://github.com/Juanito-kim/dice-duel-qa/actions/workflows/qa.yml) · [Cucumber 리포트](https://juanito-kim.github.io/dice-duel-qa/) | 새 실패 0 → **Success** |
-| Jenkins (Docker, 원격 Chrome) | Sanity 7 PASS · 3 SKIP(docker 없음) → Smoke 2/2 → PASS 15 · FAIL 4 · [Jenkinsfile](../jenkins/Jenkinsfile) · [콘솔 기록](evidence/tc003-jenkins-build3.txt) | 새 실패 0 → **UNSTABLE** (JUnit이 알려진 결함 4건을 실패로 표시. "결함은 남아 있지만 새로 깨진 것은 없음") |
+| Jenkins (Docker, 원격 Chrome) | Sanity 7 PASS · 3 SKIP(docker 없음) → Smoke 2/2 → PASS 15 · FAIL 4 · [Jenkinsfile](../jenkins/Jenkinsfile) · [콘솔 기록](reports/04-regression/2026-10-27_jenkins-build3-console.txt) | 새 실패 0 → **UNSTABLE** (JUnit이 알려진 결함 4건을 실패로 표시. "결함은 남아 있지만 새로 깨진 것은 없음") |
 
 판정 규칙: 실패한 시나리오가 모두 알려진 결함(`@BUG-xxx`)이면 통과, 아니면 빌드 실패 ([known_failures.py](../scripts/known_failures.py)).
 v1.0은 결함을 고치지 않고 릴리스 판단 자료로 쓰므로, CI의 역할은 **새로 깨진 것만 막는 것**이다. RG-07은 [log 모니터링](../monitoring/README.md), RG-08은 [성능 측정](../perf/report.md), RG-09는 [sanity.sh](../scripts/sanity.sh)로 수행했다.

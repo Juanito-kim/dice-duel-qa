@@ -9,7 +9,7 @@ Sanity는 빌드·배포 직후 **"핵심 기능이 살아 있어 상세 테스�
 깊이 확인하지 않고 넓고 빠르게 본다 (약 10초). 하나라도 FAIL이면 상세 기능 테스트를 시작하지 않고 빌드를 되돌린다.
 
 - 자동 점검: [`scripts/sanity.sh`](../scripts/sanity.sh) — CI(Jenkins·GitHub Actions)에서도 같은 스크립트를 쓴다
-- 원본 실행 기록: [evidence/04-sanity-run.txt](evidence/04-sanity-run.txt)
+- 원본 실행 기록: [reports/02-sanity/2026-10-27_local.txt](reports/02-sanity/2026-10-27_local.txt)
 
 ## 체크리스트와 결과
 
