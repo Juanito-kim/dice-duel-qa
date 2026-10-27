@@ -1,0 +1,23 @@
+# Jenkins 실행 (앱과 따로 띄운다)
+#   1) 앱:      docker compose up -d            (저장소 루트)
+#   2) Jenkins: docker compose -f jenkins/docker-compose.yml up -d --build
+#   3) http://localhost:8081 → dice-duel-qa Job → "지금 빌드"
+services:
+  jenkins:
+    build: .
+    ports:
+      - "127.0.0.1:8081:8080"   # 로컬에서만 접속 (로그인 없는 데모 설정)
+    volumes:
+      - jenkins_home:/var/jenkins_home
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # Selenium이 조작할 Chrome (headless). Jenkins의 테스트가 원격으로 연결한다
+  selenium:
+    image: selenium/standalone-chrome:4.27.0-20241204
+    shm_size: 2gb
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  jenkins_home:

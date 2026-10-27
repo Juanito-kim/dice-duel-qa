@@ -1,0 +1,23 @@
+# Jenkins 설정 (Configuration as Code). 로컬 데모 전용: 127.0.0.1에만 열고 로그인 없이 쓴다.
+jenkins:
+  systemMessage: "Dice Duel QA - Sanity · Smoke · Regression"
+  numExecutors: 1
+  authorizationStrategy: unsecured
+
+# GitHub 저장소의 jenkins/Jenkinsfile을 읽는 Pipeline Job
+jobs:
+  - script: >
+      pipelineJob('dice-duel-qa') {
+        description('Sanity → Smoke(@smoke) → 전체 회귀 → 알려진 결함 판정 → Cucumber 리포트')
+        definition {
+          cpsScm {
+            scm {
+              git {
+                remote { url('https://github.com/Juanito-kim/dice-duel-qa.git') }
+                branch('*/main')
+              }
+            }
+            scriptPath('jenkins/Jenkinsfile')
+          }
+        }
+      }

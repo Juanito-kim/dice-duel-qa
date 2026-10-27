@@ -1,0 +1,43 @@
+// Dice Duel QA 파이프라인 (Jenkins)
+// 앱은 PC의 docker compose로 떠 있고, Jenkins와 Selenium(Chrome) 컨테이너가 host.docker.internal:8080으로 접속한다.
+pipeline {
+    agent any
+    environment {
+        BASE_URL            = 'http://host.docker.internal:8080'
+        SELENIUM_REMOTE_URL = 'http://selenium:4444'
+        HEADLESS            = 'true'
+    }
+    stages {
+        stage('Sanity') {
+            steps {
+                // 핵심 기능이 살아 있는지. 실패하면 이후 단계를 하지 않는다
+                sh 'bash scripts/sanity.sh "$BASE_URL" | tee sanity.txt'
+            }
+        }
+        stage('Smoke (@smoke)') {
+            steps {
+                // 매 빌드 최소 세트. 여기는 실패하면 안 된다
+                dir('automation') { sh 'mvn -B -q test -Dcucumber.filter.tags=@smoke' }
+            }
+        }
+        stage('Regression (전체)') {
+            steps {
+                // 알려진 결함(@BUG-xxx) FAIL은 정상이므로 여기서는 멈추지 않고, 다음 단계에서 판정한다
+                dir('automation') { sh 'mvn -B -q test || true' }
+            }
+        }
+        stage('Gate (알려진 결함 외 실패 없음)') {
+            steps {
+                sh 'python3 scripts/known_failures.py automation/target/cucumber-report/cucumber.json | tee gate.md'
+            }
+        }
+    }
+    post {
+        always {
+            junit allowEmptyResults: true, testResults: 'automation/target/surefire-reports/*.xml'
+            publishHTML(target: [reportName: 'Cucumber Report', reportDir: 'automation/target/cucumber-report',
+                                 reportFiles: 'index.html', keepAll: true, alwaysLinkToLastBuild: true, allowMissing: true])
+            archiveArtifacts allowEmptyArchive: true, artifacts: 'sanity.txt, gate.md'
+        }
+    }
+}

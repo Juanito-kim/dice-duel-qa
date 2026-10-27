@@ -16,5 +16,6 @@ automation/target/
 
 # 실행 중 생기는 파일
 perf/raw/
+logs/
 monitoring/collected/
 *.log

@@ -1,0 +1,20 @@
+$ docker compose run --rm monitor --once
+[2026-10-27 14:20:03] 수집 316줄 · 인스턴스 1개 · INFO 299 · WARNING 5 · ERROR 12
+     8  ERROR · 잘못된 닉네임 (R-06)
+        예) 2026-10-27 14:20:00 ERROR [376de14a284f] match rejected: invalid nickname=' 유노'
+        예) 2026-10-27 14:20:00 ERROR [376de14a284f] match rejected: invalid nickname='유노!'
+     5  WARNING · 중복 라운드 요청 (R-09)
+        예) 2026-10-27 14:20:01 WARNING [376de14a284f] throw rejected: duplicate round id=237 round_no=1 expected=2
+        예) 2026-10-27 14:20:01 WARNING [376de14a284f] throw rejected: duplicate round id=245 round_no=1 expected=2
+     4  ERROR · 끝난 매치에 던지기 (R-08)
+        예) 2026-10-27 14:20:00 ERROR [376de14a284f] throw rejected: match already finished id=221 round_no=5
+        예) 2026-10-27 14:20:01 ERROR [376de14a284f] throw rejected: match already finished id=238 round_no=6
+ALERT  ERROR 12건이 기준 10건을 넘음
+
+$ docker compose run --rm monitor --interval 5   (두 주기 실행 후 중단)
+[2026-10-27 14:20:12] 수집 0줄 · 인스턴스 0개 · INFO 0 · WARNING 0 · ERROR 0
+OK     경보 없음
+[2026-10-27 14:20:17] 수집 0줄 · 인스턴스 0개 · INFO 0 · WARNING 0 · ERROR 0
+OK     경보 없음
+[2026-10-27 14:20:22] 수집 0줄 · 인스턴스 0개 · INFO 0 · WARNING 0 · ERROR 0
+OK     경보 없음

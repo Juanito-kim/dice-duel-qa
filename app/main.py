@@ -29,12 +29,19 @@ class KstFormatter(logging.Formatter):
         return datetime.fromtimestamp(record.created, KST).strftime("%Y-%m-%d %H:%M:%S")
 
 
-handler = logging.StreamHandler()
-handler.setFormatter(KstFormatter(f"%(asctime)s %(levelname)s [{INSTANCE}] %(message)s"))
+formatter = KstFormatter(f"%(asctime)s %(levelname)s [{INSTANCE}] %(message)s")
 log = logging.getLogger("dice")
 log.setLevel(logging.INFO)
-log.addHandler(handler)
 log.propagate = False
+handler = logging.StreamHandler()
+handler.setFormatter(formatter)
+log.addHandler(handler)
+# LOG_DIR이 있으면 인스턴스별 파일에도 쓴다 → monitoring/log_monitor.py가 모아서 ERROR를 걸러낸다
+if os.getenv("LOG_DIR"):
+    os.makedirs(os.environ["LOG_DIR"], exist_ok=True)
+    file_handler = logging.FileHandler(os.path.join(os.environ["LOG_DIR"], f"app-{INSTANCE}.log"), encoding="utf-8")
+    file_handler.setFormatter(formatter)
+    log.addHandler(file_handler)
 
 pool = ConnectionPool(
     os.environ["DATABASE_URL"],

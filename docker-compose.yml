@@ -29,6 +29,9 @@ services:
     environment:
       DATABASE_URL: postgresql://dice:dice@db:5432/dice
       TEST_MODE: "true"   # 테스트 모드: 다음 라운드 눈 지정 API 사용 가능 (R-07)
+      LOG_DIR: /var/log/dice   # 인스턴스별 log 파일 (monitor가 수집)
+    volumes:
+      - ./logs:/var/log/dice
     depends_on:
       db:
         condition: service_healthy
@@ -57,6 +60,15 @@ services:
       lb:
         condition: service_started
     restart: "no"
+
+  # Log 모니터 (TC-003 Server): 필요할 때만 실행 → docker compose run --rm monitor [--once]
+  monitor:
+    build: ./app
+    profiles: ["monitor"]
+    entrypoint: ["python", "/monitoring/log_monitor.py"]
+    volumes:
+      - ./logs:/var/log/dice:ro
+      - ./monitoring:/monitoring
 
 volumes:
   pgdata:
