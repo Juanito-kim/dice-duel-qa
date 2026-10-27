@@ -1,0 +1,620 @@
+Started by user unknown or anonymous
+Checking out git https://github.com/Juanito-kim/dice-duel-qa.git into /var/jenkins_home/workspace/dice-duel-qa@script/3d5fcfe2f38ad3181996eac5d6ed7a47f7c4eece7eae6704a31369634c26184e to read jenkins/Jenkinsfile
+The recommended git tool is: NONE
+No credentials specified
+ > git rev-parse --resolve-git-dir /var/jenkins_home/workspace/dice-duel-qa@script/3d5fcfe2f38ad3181996eac5d6ed7a47f7c4eece7eae6704a31369634c26184e/.git # timeout=10
+Fetching changes from the remote Git repository
+ > git config remote.origin.url https://github.com/Juanito-kim/dice-duel-qa.git # timeout=10
+Fetching upstream changes from https://github.com/Juanito-kim/dice-duel-qa.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.47.3'
+ > git fetch --tags --force --progress -- https://github.com/Juanito-kim/dice-duel-qa.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git rev-parse refs/remotes/origin/main^{commit} # timeout=10
+Checking out Revision 0975bced6e04a1017d7fcf391513923a6649777d (refs/remotes/origin/main)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 0975bced6e04a1017d7fcf391513923a6649777d # timeout=10
+Commit message: "README, cross-doc links, TC-003 captures; CI tweaks"
+ > git rev-list --no-walk 0975bced6e04a1017d7fcf391513923a6649777d # timeout=10
+[Pipeline] Start of Pipeline
+[Pipeline] node
+Running on Jenkins in /var/jenkins_home/workspace/dice-duel-qa
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Declarative: Checkout SCM)
+[Pipeline] checkout
+The recommended git tool is: NONE
+No credentials specified
+ > git rev-parse --resolve-git-dir /var/jenkins_home/workspace/dice-duel-qa/.git # timeout=10
+Fetching changes from the remote Git repository
+ > git config remote.origin.url https://github.com/Juanito-kim/dice-duel-qa.git # timeout=10
+Fetching upstream changes from https://github.com/Juanito-kim/dice-duel-qa.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.47.3'
+ > git fetch --tags --force --progress -- https://github.com/Juanito-kim/dice-duel-qa.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git rev-parse refs/remotes/origin/main^{commit} # timeout=10
+Checking out Revision 0975bced6e04a1017d7fcf391513923a6649777d (refs/remotes/origin/main)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 0975bced6e04a1017d7fcf391513923a6649777d # timeout=10
+Commit message: "README, cross-doc links, TC-003 captures; CI tweaks"
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Sanity)
+[Pipeline] sh
++ bash scripts/sanity.sh http://host.docker.internal:8080
++ tee sanity.txt
+Sanity 2026-10-27 05:41:53 target=http://host.docker.internal:8080
+SKIP  SN-01  db·app 컨테이너 healthy  [docker 없음]
+PASS  SN-02  /health 응답 ok  [{"status":"ok","instance":"964d2669e80f","test_mode":true}]
+PASS  SN-03  게임 화면: 규칙·닉네임·시작·던지기 요소  [4/4]
+PASS  SN-04  매치 시작 (유효한 닉네임)  [match id=201]
+PASS  SN-05  던지기 1회 → 라운드 1 기록  [rounds_played=1]
+SKIP  SN-06  매치 조회 API = DB  [docker 없음]
+PASS  SN-07  통계 화면 200, 매치 목록 있음  [stats=200 total=201]
+PASS  SN-08  합계 분포 2개 11행·3개 16행  [2개=11 3개=16]
+PASS  SN-09  닉네임별 전적 응답 (봇 10명 이상)  [players=12]
+SKIP  SN-10  처리 log에 방금 라운드가 찍힘  [docker 없음]
+RESULT pass=7 fail=0 skip=3
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Smoke (@smoke))
+[Pipeline] dir
+Running in /var/jenkins_home/workspace/dice-duel-qa/automation
+[Pipeline] {
+[Pipeline] sh
++ mvn -B -q test -Dcucumber.filter.tags=@smoke
+
+@smoke @U-01
+Scenario: 처음 온 사용자가 규칙을 보고 한 판을 시작한다 (US-01) # features/03_match_flow.feature:7
+Oct 27, 2026 5:41:56 AM org.openqa.selenium.remote.tracing.opentelemetry.OpenTelemetryTracer createTracer
+INFO: Using OpenTelemetry for tracing
+  Given 사용자가 게임 화면에 접속했다                     # qa.diceduel.steps.GameSteps.openGame()
+
+    Embedding 화면 [image/png 53854 bytes]
+
+  Then 게임 규칙 안내에 "먼저 3라운드를 이기면" 문구가 있다       # qa.diceduel.steps.GameSteps.rulesContain(java.lang.String)
+
+    Embedding 화면 [image/png 53854 bytes]
+
+  And 게임 규칙 안내에 "2~10자" 문구가 있다               # qa.diceduel.steps.GameSteps.rulesContain(java.lang.String)
+
+    Embedding 화면 [image/png 53854 bytes]
+
+  When 닉네임 "후아"와 주사위 2개로 매치 시작을 누른다          # qa.diceduel.steps.GameSteps.pressStart(java.lang.String,int)
+
+    Embedding 화면 [image/png 61735 bytes]
+
+  And 사용자가 던지기 버튼을 누른다                       # qa.diceduel.steps.GameSteps.pressThrow()
+
+    Embedding 화면 [image/png 64884 bytes]
+
+  Then 라운드 1의 양쪽 주사위와 합계가 표시된다               # qa.diceduel.steps.GameSteps.firstRoundShown()
+
+    Embedding 화면 [image/png 64884 bytes]
+
+
+@smoke @R-03 @R-08
+Scenario: 3승을 하면 매치가 즉시 끝나고 더 던질 수 없다 (TC-C01) # features/03_match_flow.feature:16
+  Given 사용자가 "후아" 닉네임으로 주사위 2개 매치를 시작했다        # qa.diceduel.steps.GameSteps.startedMatch(java.lang.String,int)
+
+    Embedding 화면 [image/png 61975 bytes]
+
+  When 플레이어가 이기는 라운드를 3번 진행한다                  # qa.diceduel.steps.GameSteps.playerWins(int)
+
+    Embedding 화면 [image/png 62191 bytes]
+
+  Then 매치 결과는 "매치 종료 · 플레이어 승리"로 표시된다          # qa.diceduel.steps.GameSteps.matchResult(java.lang.String)
+
+    Embedding 화면 [image/png 62191 bytes]
+
+  And 스코어는 3 : 0 이 된다                          # qa.diceduel.steps.GameSteps.score(java.lang.String)
+
+    Embedding 화면 [image/png 62191 bytes]
+
+  And 던지기 버튼은 비활성화된다                           # qa.diceduel.steps.GameSteps.throwDisabled()
+
+    Embedding 화면 [image/png 62191 bytes]
+
+[Pipeline] }
+[Pipeline] // dir
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Regression (전체))
+[Pipeline] dir
+Running in /var/jenkins_home/workspace/dice-duel-qa/automation
+[Pipeline] {
+[Pipeline] sh
++ mvn -B -q test -Dmaven.test.failure.ignore=true
+
+@R-06
+Scenario Outline: 닉네임 길이 1자는 거부된다  # features/01_match_start.feature:16
+Oct 27, 2026 5:42:03 AM org.openqa.selenium.remote.tracing.opentelemetry.OpenTelemetryTracer createTracer
+INFO: Using OpenTelemetry for tracing
+  Given 사용자가 게임 화면에 접속했다           # qa.diceduel.steps.GameSteps.openGame()
+
+    Embedding 화면 [image/png 53854 bytes]
+
+  When 닉네임 "a"과 주사위 2개로 매치 시작을 누른다 # qa.diceduel.steps.GameSteps.pressStart(java.lang.String,int)
+
+    Embedding 화면 [image/png 60126 bytes]
+
+  Then 매치 시작 결과는 "거부"이다            # qa.diceduel.steps.GameSteps.startOutcome(java.lang.String)
+
+    Embedding 화면 [image/png 60126 bytes]
+
+
+@R-06
+Scenario Outline: 닉네임 길이 2자는 시작된다   # features/01_match_start.feature:17
+  Given 사용자가 게임 화면에 접속했다            # qa.diceduel.steps.GameSteps.openGame()
+
+    Embedding 화면 [image/png 53854 bytes]
+
+  When 닉네임 "ab"과 주사위 2개로 매치 시작을 누른다 # qa.diceduel.steps.GameSteps.pressStart(java.lang.String,int)
+
+    Embedding 화면 [image/png 61761 bytes]
+
+  Then 매치 시작 결과는 "시작"이다             # qa.diceduel.steps.GameSteps.startOutcome(java.lang.String)
+
+    Embedding 화면 [image/png 61761 bytes]
+
+
+@R-06
+Scenario Outline: 닉네임 길이 9자는 시작된다          # features/01_match_start.feature:18
+  Given 사용자가 게임 화면에 접속했다                   # qa.diceduel.steps.GameSteps.openGame()
+
+    Embedding 화면 [image/png 53854 bytes]
+
+  When 닉네임 "abcdefghi"과 주사위 2개로 매치 시작을 누른다 # qa.diceduel.steps.GameSteps.pressStart(java.lang.String,int)
+
+    Embedding 화면 [image/png 63846 bytes]
+
+  Then 매치 시작 결과는 "시작"이다                    # qa.diceduel.steps.GameSteps.startOutcome(java.lang.String)
+
+    Embedding 화면 [image/png 63846 bytes]
+
+
+@R-06
+Scenario Outline: 닉네임 길이 11자는 거부된다           # features/01_match_start.feature:19
+  Given 사용자가 게임 화면에 접속했다                     # qa.diceduel.steps.GameSteps.openGame()
+
+    Embedding 화면 [image/png 53854 bytes]
+
+  When 닉네임 "abcdefghijk"과 주사위 2개로 매치 시작을 누른다 # qa.diceduel.steps.GameSteps.pressStart(java.lang.String,int)
+
+    Embedding 화면 [image/png 61361 bytes]
+
+  Then 매치 시작 결과는 "거부"이다                      # qa.diceduel.steps.GameSteps.startOutcome(java.lang.String)
+
+    Embedding 화면 [image/png 61361 bytes]
+
+
+@R-06 @BUG-002
+Scenario Outline: 닉네임 길이 10자는 시작된다          # features/01_match_start.feature:24
+  Given 사용자가 게임 화면에 접속했다                    # qa.diceduel.steps.GameSteps.openGame()
+
+    Embedding 화면 [image/png 53854 bytes]
+
+  When 닉네임 "abcdefghij"과 주사위 2개로 매치 시작을 누른다 # qa.diceduel.steps.GameSteps.pressStart(java.lang.String,int)
+
+    Embedding 화면 [image/png 61213 bytes]
+
+  Then 매치 시작 결과는 "시작"이다                     # qa.diceduel.steps.GameSteps.startOutcome(java.lang.String)
+      org.opentest4j.AssertionFailedError: 시작되어야 하는데 거부됨. 화면 문구: 닉네임은 2~10자의 한글·영문·숫자만 사용할 수 있습니다. ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at qa.diceduel.steps.GameSteps.startOutcome(GameSteps.java:81)
+	at ✽.매치 시작 결과는 "시작"이다(classpath:features/01_match_start.feature:12)
+
+
+    Embedding 실패 시점 화면 [image/png 61213 bytes]
+
+
+@R-05 @BUG-004
+Scenario: 매치 중에는 주사위 개수를 바꿀 수 없다 (TC-A10) # features/01_match_start.feature:27
+  Given 사용자가 게임 화면에 접속했다                  # qa.diceduel.steps.GameSteps.openGame()
+
+    Embedding 화면 [image/png 53854 bytes]
+
+  When 닉네임 "후아"와 주사위 2개로 매치 시작을 누른다       # qa.diceduel.steps.GameSteps.pressStart(java.lang.String,int)
+
+    Embedding 화면 [image/png 61995 bytes]
+
+  And 매치 진행 중에 주사위 개수 3개를 선택한다            # qa.diceduel.steps.GameSteps.changeDiceDuringMatch(int)
+
+    Embedding 화면 [image/png 62094 bytes]
+
+  Then 주사위 개수 선택은 2개 그대로다                 # qa.diceduel.steps.GameSteps.diceSelectionUnchanged(int)
+      org.opentest4j.AssertionFailedError: 매치 중인데 주사위 개수 선택이 바뀜 ==> expected: <2> but was: <3>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:563)
+	at qa.diceduel.steps.GameSteps.diceSelectionUnchanged(GameSteps.java:90)
+	at ✽.주사위 개수 선택은 2개 그대로다(classpath:features/01_match_start.feature:30)
+
+
+    Embedding 실패 시점 화면 [image/png 62094 bytes]
+
+  When 사용자가 던지기 버튼을 누른다                   # qa.diceduel.steps.GameSteps.pressThrow()
+  Then 양쪽 주사위는 각각 2개다                     # qa.diceduel.steps.GameSteps.diceCountShown(int)
+
+@R-01 @R-02
+Scenario Outline: TC-B01 플레이어 [6, 5] vs 컴퓨터 [1, 2] → 플레이어 승리 # features/02_round_judgement.feature:16
+  Given 사용자가 "후아" 닉네임으로 주사위 2개 매치를 시작했다                      # qa.diceduel.steps.GameSteps.startedMatch(java.lang.String,int)
+
+    Embedding 화면 [image/png 61850 bytes]
+
+  And 다음 라운드 결과가 플레이어 [6, 5], 컴퓨터 [1, 2]로 정해져 있다             # qa.diceduel.steps.GameSteps.nextRoll(java.lang.String,java.lang.String)
+
+    Embedding 화면 [image/png 61850 bytes]
+
+  When 사용자가 던지기 버튼을 누른다                                      # qa.diceduel.steps.GameSteps.pressThrow()
+
+    Embedding 화면 [image/png 64717 bytes]
+
+  Then 라운드 결과는 "플레이어 승리"로 표시된다                               # qa.diceduel.steps.GameSteps.roundResult(java.lang.String)
+
+    Embedding 화면 [image/png 64717 bytes]
+
+  And 스코어는 1 : 0 이 된다                                        # qa.diceduel.steps.GameSteps.score(java.lang.String)
+
+    Embedding 화면 [image/png 64717 bytes]
+
+
+@R-01 @R-02
+Scenario Outline: TC-B02 플레이어 [1, 2] vs 컴퓨터 [6, 5] → 컴퓨터 승리 # features/02_round_judgement.feature:17
+  Given 사용자가 "후아" 닉네임으로 주사위 2개 매치를 시작했다                     # qa.diceduel.steps.GameSteps.startedMatch(java.lang.String,int)
+
+    Embedding 화면 [image/png 61985 bytes]
+
+  And 다음 라운드 결과가 플레이어 [1, 2], 컴퓨터 [6, 5]로 정해져 있다            # qa.diceduel.steps.GameSteps.nextRoll(java.lang.String,java.lang.String)
+
+    Embedding 화면 [image/png 61985 bytes]
+
+  When 사용자가 던지기 버튼을 누른다                                     # qa.diceduel.steps.GameSteps.pressThrow()
+
+    Embedding 화면 [image/png 63982 bytes]
+
+  Then 라운드 결과는 "컴퓨터 승리"로 표시된다                               # qa.diceduel.steps.GameSteps.roundResult(java.lang.String)
+
+    Embedding 화면 [image/png 63982 bytes]
+
+  And 스코어는 0 : 1 이 된다                                       # qa.diceduel.steps.GameSteps.score(java.lang.String)
+
+    Embedding 화면 [image/png 63982 bytes]
+
+
+@R-01 @R-02
+Scenario Outline: TC-B03 플레이어 [3, 3] vs 컴퓨터 [2, 4] → 플레이어 승리 # features/02_round_judgement.feature:21
+  Given 사용자가 "후아" 닉네임으로 주사위 2개 매치를 시작했다                      # qa.diceduel.steps.GameSteps.startedMatch(java.lang.String,int)
+
+    Embedding 화면 [image/png 61989 bytes]
+
+  And 다음 라운드 결과가 플레이어 [3, 3], 컴퓨터 [2, 4]로 정해져 있다             # qa.diceduel.steps.GameSteps.nextRoll(java.lang.String,java.lang.String)
+
+    Embedding 화면 [image/png 61989 bytes]
+
+  When 사용자가 던지기 버튼을 누른다                                      # qa.diceduel.steps.GameSteps.pressThrow()
+
+    Embedding 화면 [image/png 65069 bytes]
+
+  Then 라운드 결과는 "플레이어 승리"로 표시된다                               # qa.diceduel.steps.GameSteps.roundResult(java.lang.String)
+
+    Embedding 화면 [image/png 65069 bytes]
+
+  And 스코어는 1 : 0 이 된다                                        # qa.diceduel.steps.GameSteps.score(java.lang.String)
+
+    Embedding 화면 [image/png 65069 bytes]
+
+
+@R-01 @R-02
+Scenario Outline: TC-B04 플레이어 [2, 4] vs 컴퓨터 [3, 3] → 컴퓨터 승리 # features/02_round_judgement.feature:22
+  Given 사용자가 "후아" 닉네임으로 주사위 2개 매치를 시작했다                     # qa.diceduel.steps.GameSteps.startedMatch(java.lang.String,int)
+
+    Embedding 화면 [image/png 61706 bytes]
+
+  And 다음 라운드 결과가 플레이어 [2, 4], 컴퓨터 [3, 3]로 정해져 있다            # qa.diceduel.steps.GameSteps.nextRoll(java.lang.String,java.lang.String)
+
+    Embedding 화면 [image/png 61706 bytes]
+
+  When 사용자가 던지기 버튼을 누른다                                     # qa.diceduel.steps.GameSteps.pressThrow()
+
+    Embedding 화면 [image/png 64391 bytes]
+
+  Then 라운드 결과는 "컴퓨터 승리"로 표시된다                               # qa.diceduel.steps.GameSteps.roundResult(java.lang.String)
+
+    Embedding 화면 [image/png 64391 bytes]
+
+  And 스코어는 0 : 1 이 된다                                       # qa.diceduel.steps.GameSteps.score(java.lang.String)
+
+    Embedding 화면 [image/png 64391 bytes]
+
+
+@R-01 @R-02
+Scenario Outline: TC-B06 플레이어 [1, 4] vs 컴퓨터 [2, 3] → 무승부 # features/02_round_judgement.feature:23
+  Given 사용자가 "후아" 닉네임으로 주사위 2개 매치를 시작했다                  # qa.diceduel.steps.GameSteps.startedMatch(java.lang.String,int)
+
+    Embedding 화면 [image/png 61691 bytes]
+
+  And 다음 라운드 결과가 플레이어 [1, 4], 컴퓨터 [2, 3]로 정해져 있다         # qa.diceduel.steps.GameSteps.nextRoll(java.lang.String,java.lang.String)
+
+    Embedding 화면 [image/png 61691 bytes]
+
+  When 사용자가 던지기 버튼을 누른다                                  # qa.diceduel.steps.GameSteps.pressThrow()
+
+    Embedding 화면 [image/png 63472 bytes]
+
+  Then 라운드 결과는 "무승부"로 표시된다                               # qa.diceduel.steps.GameSteps.roundResult(java.lang.String)
+
+    Embedding 화면 [image/png 63472 bytes]
+
+  And 스코어는 0 : 0 이 된다                                    # qa.diceduel.steps.GameSteps.score(java.lang.String)
+
+    Embedding 화면 [image/png 63472 bytes]
+
+
+@R-01 @R-02 @BUG-001
+Scenario Outline: TC-B05 플레이어 [3, 3] vs 컴퓨터 [3, 3] → 무승부 # features/02_round_judgement.feature:28
+  Given 사용자가 "후아" 닉네임으로 주사위 2개 매치를 시작했다                  # qa.diceduel.steps.GameSteps.startedMatch(java.lang.String,int)
+
+    Embedding 화면 [image/png 61726 bytes]
+
+  And 다음 라운드 결과가 플레이어 [3, 3], 컴퓨터 [3, 3]로 정해져 있다         # qa.diceduel.steps.GameSteps.nextRoll(java.lang.String,java.lang.String)
+
+    Embedding 화면 [image/png 61726 bytes]
+
+  When 사용자가 던지기 버튼을 누른다                                  # qa.diceduel.steps.GameSteps.pressThrow()
+
+    Embedding 화면 [image/png 64825 bytes]
+
+  Then 라운드 결과는 "무승부"로 표시된다                               # qa.diceduel.steps.GameSteps.roundResult(java.lang.String)
+      org.opentest4j.AssertionFailedError: 라운드 결과 ==> expected: <무승부> but was: <플레이어 승리>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at qa.diceduel.steps.GameSteps.roundResult(GameSteps.java:101)
+	at ✽.라운드 결과는 "무승부"로 표시된다(classpath:features/02_round_judgement.feature:11)
+
+
+    Embedding 실패 시점 화면 [image/png 64825 bytes]
+
+  And 스코어는 0 : 0 이 된다                                    # qa.diceduel.steps.GameSteps.score(java.lang.String)
+
+@R-01 @R-02
+Scenario Outline: TC-B07 플레이어 [4, 4, 1] vs 컴퓨터 [3, 3, 3] → 컴퓨터 승리 # features/02_round_judgement.feature:32
+  Given 사용자가 "후아" 닉네임으로 주사위 3개 매치를 시작했다                           # qa.diceduel.steps.GameSteps.startedMatch(java.lang.String,int)
+
+    Embedding 화면 [image/png 61969 bytes]
+
+  And 다음 라운드 결과가 플레이어 [4, 4, 1], 컴퓨터 [3, 3, 3]로 정해져 있다            # qa.diceduel.steps.GameSteps.nextRoll(java.lang.String,java.lang.String)
+
+    Embedding 화면 [image/png 61969 bytes]
+
+  When 사용자가 던지기 버튼을 누른다                                           # qa.diceduel.steps.GameSteps.pressThrow()
+
+    Embedding 화면 [image/png 64695 bytes]
+
+  Then 라운드 결과는 "컴퓨터 승리"로 표시된다                                     # qa.diceduel.steps.GameSteps.roundResult(java.lang.String)
+
+    Embedding 화면 [image/png 64695 bytes]
+
+  And 스코어는 0 : 1 이 된다                                             # qa.diceduel.steps.GameSteps.score(java.lang.String)
+
+    Embedding 화면 [image/png 64695 bytes]
+
+
+@R-01 @R-02
+Scenario Outline: TC-B08 플레이어 [4, 4, 1] vs 컴퓨터 [2, 2, 5] → 무승부 # features/02_round_judgement.feature:33
+  Given 사용자가 "후아" 닉네임으로 주사위 3개 매치를 시작했다                        # qa.diceduel.steps.GameSteps.startedMatch(java.lang.String,int)
+
+    Embedding 화면 [image/png 61851 bytes]
+
+  And 다음 라운드 결과가 플레이어 [4, 4, 1], 컴퓨터 [2, 2, 5]로 정해져 있다         # qa.diceduel.steps.GameSteps.nextRoll(java.lang.String,java.lang.String)
+
+    Embedding 화면 [image/png 61851 bytes]
+
+  When 사용자가 던지기 버튼을 누른다                                        # qa.diceduel.steps.GameSteps.pressThrow()
+
+    Embedding 화면 [image/png 63850 bytes]
+
+  Then 라운드 결과는 "무승부"로 표시된다                                     # qa.diceduel.steps.GameSteps.roundResult(java.lang.String)
+
+    Embedding 화면 [image/png 63850 bytes]
+
+  And 스코어는 0 : 0 이 된다                                          # qa.diceduel.steps.GameSteps.score(java.lang.String)
+
+    Embedding 화면 [image/png 63850 bytes]
+
+
+@smoke @U-01
+Scenario: 처음 온 사용자가 규칙을 보고 한 판을 시작한다 (US-01) # features/03_match_flow.feature:7
+  Given 사용자가 게임 화면에 접속했다                     # qa.diceduel.steps.GameSteps.openGame()
+
+    Embedding 화면 [image/png 53854 bytes]
+
+  Then 게임 규칙 안내에 "먼저 3라운드를 이기면" 문구가 있다       # qa.diceduel.steps.GameSteps.rulesContain(java.lang.String)
+
+    Embedding 화면 [image/png 53854 bytes]
+
+  And 게임 규칙 안내에 "2~10자" 문구가 있다               # qa.diceduel.steps.GameSteps.rulesContain(java.lang.String)
+
+    Embedding 화면 [image/png 53854 bytes]
+
+  When 닉네임 "후아"와 주사위 2개로 매치 시작을 누른다          # qa.diceduel.steps.GameSteps.pressStart(java.lang.String,int)
+
+    Embedding 화면 [image/png 61920 bytes]
+
+  And 사용자가 던지기 버튼을 누른다                       # qa.diceduel.steps.GameSteps.pressThrow()
+
+    Embedding 화면 [image/png 64847 bytes]
+
+  Then 라운드 1의 양쪽 주사위와 합계가 표시된다               # qa.diceduel.steps.GameSteps.firstRoundShown()
+
+    Embedding 화면 [image/png 64847 bytes]
+
+
+@smoke @R-03 @R-08
+Scenario: 3승을 하면 매치가 즉시 끝나고 더 던질 수 없다 (TC-C01) # features/03_match_flow.feature:16
+  Given 사용자가 "후아" 닉네임으로 주사위 2개 매치를 시작했다        # qa.diceduel.steps.GameSteps.startedMatch(java.lang.String,int)
+
+    Embedding 화면 [image/png 61983 bytes]
+
+  When 플레이어가 이기는 라운드를 3번 진행한다                  # qa.diceduel.steps.GameSteps.playerWins(int)
+
+    Embedding 화면 [image/png 62431 bytes]
+
+  Then 매치 결과는 "매치 종료 · 플레이어 승리"로 표시된다          # qa.diceduel.steps.GameSteps.matchResult(java.lang.String)
+
+    Embedding 화면 [image/png 62431 bytes]
+
+  And 스코어는 3 : 0 이 된다                          # qa.diceduel.steps.GameSteps.score(java.lang.String)
+
+    Embedding 화면 [image/png 62431 bytes]
+
+  And 던지기 버튼은 비활성화된다                           # qa.diceduel.steps.GameSteps.throwDisabled()
+
+    Embedding 화면 [image/png 62431 bytes]
+
+
+@S-04 @BUG-003
+Scenario: 닉네임별 승률은 이긴 매치 ÷ 끝난 매치다 (TC-F12, F13) # features/04_stats.feature:9
+  Given 사용자가 통계 화면에 접속했다                        # qa.diceduel.steps.StatsSteps.openStats()
+
+    Embedding 화면 [image/png 125212 bytes]
+
+  Then 닉네임별 전적의 모든 승률이 매치 기록으로 계산한 값과 같다        # qa.diceduel.steps.StatsSteps.winRatesMatch()
+      org.opentest4j.AssertionFailedError: S-04 승률 불일치 3건: 유노 화면 52.63% vs 계산 58.82% (10승 / 끝난 매치 17); 메르쿠리우스 화면 28.57% vs 계산 29.63% (8승 / 끝난 매치 27); 후아 화면 21.43% vs 계산 100.00% (3승 / 끝난 매치 3) ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at qa.diceduel.steps.StatsSteps.winRatesMatch(StatsSteps.java:67)
+	at ✽.닉네임별 전적의 모든 승률이 매치 기록으로 계산한 값과 같다(classpath:features/04_stats.feature:10)
+
+
+    Embedding 실패 시점 화면 [image/png 125212 bytes]
+
+
+@S-01
+Scenario: 닉네임 일부로 매치 기록을 찾는다 (TC-F01) # features/04_stats.feature:13
+  Given 사용자가 통계 화면에 접속했다              # qa.diceduel.steps.StatsSteps.openStats()
+
+    Embedding 화면 [image/png 125212 bytes]
+
+  When 닉네임 "누스"로 매치 기록을 조회한다          # qa.diceduel.steps.StatsSteps.searchNickname(java.lang.String)
+
+    Embedding 화면 [image/png 147286 bytes]
+
+  Then 매치 기록의 닉네임은 모두 "누스"를 포함한다      # qa.diceduel.steps.StatsSteps.allNicknamesContain(java.lang.String)
+
+    Embedding 화면 [image/png 147286 bytes]
+
+  And 건수 표시는 서버의 전체 건수와 같다            # qa.diceduel.steps.StatsSteps.countMatchesServer()
+
+    Embedding 화면 [image/png 147286 bytes]
+
+
+@U-02
+Scenario: 더보기로 매치 기록을 끝까지 불러온다 (TC-F14) # features/04_stats.feature:19
+  Given 사용자가 통계 화면에 접속했다                # qa.diceduel.steps.StatsSteps.openStats()
+
+    Embedding 화면 [image/png 125212 bytes]
+
+  Then 매치 기록은 처음에 20건만 보인다              # qa.diceduel.steps.StatsSteps.firstPage(int)
+
+    Embedding 화면 [image/png 125212 bytes]
+
+  When 더보기를 더 이상 없을 때까지 누른다             # qa.diceduel.steps.StatsSteps.loadAll()
+
+    Embedding 화면 [image/png 171993 bytes]
+
+  Then 매치 기록 건수는 서버의 전체 건수와 같고 중복이 없다   # qa.diceduel.steps.StatsSteps.allLoaded()
+
+    Embedding 화면 [image/png 171993 bytes]
+
+[ERROR] Tests run: 19, Failures: 4, Errors: 0, Skipped: 0, Time elapsed: 22.25 s <<< FAILURE! -- in qa.diceduel.RunCucumberTest
+[ERROR] 상한 경계 10자 (TC-A03).Example #2.1 -- Time elapsed: 0.800 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 시작되어야 하는데 거부됨. 화면 문구: 닉네임은 2~10자의 한글·영문·숫자만 사용할 수 있습니다. ==> expected: <true> but was: <false>
+	at qa.diceduel.steps.GameSteps.startOutcome(GameSteps.java:81)
+	at ✽.매치 시작 결과는 "시작"이다(classpath:features/01_match_start.feature:12)
+
+[ERROR] 매치 시작 - 닉네임과 주사위 개수 (R-05, R-06).매치 중에는 주사위 개수를 바꿀 수 없다 (TC-A10) -- Time elapsed: 0.867 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 매치 중인데 주사위 개수 선택이 바뀜 ==> expected: <2> but was: <3>
+	at qa.diceduel.steps.GameSteps.diceSelectionUnchanged(GameSteps.java:90)
+	at ✽.주사위 개수 선택은 2개 그대로다(classpath:features/01_match_start.feature:30)
+
+[ERROR] 합이 같다 - 둘 다 더블.Example #3.1 -- Time elapsed: 0.884 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 라운드 결과 ==> expected: <무승부> but was: <플레이어 승리>
+	at qa.diceduel.steps.GameSteps.roundResult(GameSteps.java:101)
+	at ✽.라운드 결과는 "무승부"로 표시된다(classpath:features/02_round_judgement.feature:11)
+
+[ERROR] 통계 화면 (S-01, S-04, U-02).닉네임별 승률은 이긴 매치 ÷ 끝난 매치다 (TC-F12, F13) -- Time elapsed: 0.999 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: S-04 승률 불일치 3건: 유노 화면 52.63% vs 계산 58.82% (10승 / 끝난 매치 17); 메르쿠리우스 화면 28.57% vs 계산 29.63% (8승 / 끝난 매치 27); 후아 화면 21.43% vs 계산 100.00% (3승 / 끝난 매치 3) ==> expected: <true> but was: <false>
+	at qa.diceduel.steps.StatsSteps.winRatesMatch(StatsSteps.java:67)
+	at ✽.닉네임별 전적의 모든 승률이 매치 기록으로 계산한 값과 같다(classpath:features/04_stats.feature:10)
+
+[ERROR] Failures: 
+[ERROR]   매치 중인데 주사위 개수 선택이 바뀜 ==> expected: <2> but was: <3>
+[ERROR]   시작되어야 하는데 거부됨. 화면 문구: 닉네임은 2~10자의 한글·영문·숫자만 사용할 수 있습니다. ==> expected: <true> but was: <false>
+[ERROR]   S-04 승률 불일치 3건: 유노 화면 52.63% vs 계산 58.82% (10승 / 끝난 매치 17); 메르쿠리우스 화면 28.57% vs 계산 29.63% (8승 / 끝난 매치 27); 후아 화면 21.43% vs 계산 100.00% (3승 / 끝난 매치 3) ==> expected: <true> but was: <false>
+[ERROR]   라운드 결과 ==> expected: <무승부> but was: <플레이어 승리>
+[ERROR] Tests run: 19, Failures: 4, Errors: 0, Skipped: 0
+[ERROR] There are test failures.
+
+See /var/jenkins_home/workspace/dice-duel-qa/automation/target/surefire-reports for the individual test results.
+See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[Pipeline] }
+[Pipeline] // dir
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Gate (알려진 결함 외 실패 없음))
+[Pipeline] sh
++ python3 scripts/known_failures.py automation/target/cucumber-report/cucumber.json
++ tee gate.md
+### Cucumber 회귀 결과: 전체 19 · PASS 15 · 알려진 결함 FAIL 4 · 새 실패 0
+
+| 판정 | 결함 | 시나리오 |
+|---|---|---|
+| 알려진 결함 | @BUG-002 | 닉네임 길이 10자는 시작된다 |
+| 알려진 결함 | @BUG-004 | 매치 중에는 주사위 개수를 바꿀 수 없다 (TC-A10) |
+| 알려진 결함 | @BUG-001 | TC-B05 플레이어 [3, 3] vs 컴퓨터 [3, 3] → 무승부 |
+| 알려진 결함 | @BUG-003 | 닉네임별 승률은 이긴 매치 ÷ 끝난 매치다 (TC-F12, F13) |
+
+✅ 알려진 결함 외 실패 없음
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Declarative: Post Actions)
+[Pipeline] junit
+Recording test results
+[Checks API] No suitable checks publisher found.
+[Pipeline] publishHTML
+[htmlpublisher] Archiving HTML reports...
+[htmlpublisher] Archiving at BUILD level /var/jenkins_home/workspace/dice-duel-qa/automation/target/cucumber-report to Cucumber_20Report
+[htmlpublisher] Copying recursive using current thread
+[Pipeline] archiveArtifacts
+Archiving artifacts
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] End of Pipeline
+Finished: UNSTABLE
