@@ -17,7 +17,6 @@
 | `docs/progress.md` | 완료 | 이 문서 |
 | `app/` | v1.0 | API+Processor(FastAPI), DB 스키마, 게임·통계 화면, Generator, nginx |
 | `docker-compose.yml` | v1.0 | db · app · lb · generator |
-| `CLAUDE.md` | 갱신 | 일정 재편, 이슈 유형, 대표 TC, 화면 설명, 디자인 규칙 |
 | 화면 캡처 (`docs/images/`) | 미작성 | 디자인이 더 바뀔 수 있어 수요일 README 작업 때 촬영 |
 
 커밋: `f3ade46` 앱·문서 전체 → `1e3a865` 진행 기록 → `84990c5` 통계 화면 아이콘 → (이 정리 커밋)
