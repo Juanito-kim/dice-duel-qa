@@ -10,4 +10,7 @@ PASS  SN-08  합계 분포 2개 11행·3개 16행  [2개=11 3개=16]
 PASS  SN-09  닉네임별 전적 응답 (봇 10명 이상)  [players=11]
 PASS  SN-10  처리 log에 방금 라운드가 찍힘  [round processed id=199]
 RESULT pass=10 fail=0
+
+# 브라우저 수동 확인 (스크립트 범위 밖)
 PASS  SN-11  게임 화면(브라우저) 시작→던지기  [started=true rolling true→false round=1 result=컴퓨터 승리 die1=6]
+TOTAL pass=11 fail=0
