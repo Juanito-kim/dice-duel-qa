@@ -1,0 +1,4 @@
+health {'status': 'ok', 'instance': '205279305ec3', 'test_mode': False}
+start 200 336
+next-roll 403 {'detail': '테스트 모드에서만 사용할 수 있습니다.'}
+2026-10-27 13:46:40 WARNING [205279305ec3] next-roll rejected: test mode off id=336

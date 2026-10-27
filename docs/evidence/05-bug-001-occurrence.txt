@@ -1,0 +1,15 @@
+ dice_count | rounds_total | same_doubles | judged_player 
+------------+--------------+--------------+---------------
+          2 |         3358 |           14 |            14
+          3 |         3104 |            0 |             0
+(2 rows)
+
+ match_id | round_no | player_dice | cpu_dice | result 
+----------+----------+-------------+----------+--------
+       49 |        3 | {2,2}       | {2,2}    | PLAYER
+       95 |        2 | {3,3}       | {3,3}    | PLAYER
+      119 |        2 | {1,1}       | {1,1}    | PLAYER
+      120 |        3 | {3,3}       | {3,3}    | PLAYER
+      130 |        5 | {5,5}       | {5,5}    | PLAYER
+(5 rows)
+

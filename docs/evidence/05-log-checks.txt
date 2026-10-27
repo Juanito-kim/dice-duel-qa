@@ -1,0 +1,15 @@
+# log checks 2026-10-27 13:46:20
+## TC-A08 잘못된 닉네임 → ERROR (UI 수행분: 'a', 'abcdefghijk', '유노!', 'abcdefghij')
+2026-10-27 13:44:49 ERROR [a2c6aea7a6a4] match rejected: invalid nickname='abcdefghij'
+2026-10-27 13:44:50 ERROR [a2c6aea7a6a4] match rejected: invalid nickname='abcdefghijk'
+2026-10-27 13:44:51 ERROR [a2c6aea7a6a4] match rejected: invalid nickname='유노!'
+2026-10-27 13:45:26 ERROR [a2c6aea7a6a4] match rejected: invalid nickname='abcdefghij'
+## TC-C06 끝난 매치 던지기 → ERROR (#223)
+2026-10-27 13:44:32 ERROR [a2c6aea7a6a4] throw rejected: match already finished id=223 round_no=4
+## TC-E01 중복 라운드 → WARNING (#229)
+2026-10-27 13:44:32 WARNING [a2c6aea7a6a4] throw rejected: duplicate round id=229 round_no=1 expected=2
+## 참고: 레벨별 건수
+     24  ERROR [
+   1681  INFO [
+    103  WARNING [
+2026-10-27 13:44:48 ERROR [a2c6aea7a6a4] match rejected: invalid nickname='a'
