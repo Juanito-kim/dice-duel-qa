@@ -1,0 +1,13 @@
+Sanity 2026-10-27 13:42:31 target=http://localhost:8080
+PASS  SN-01  db·app 컨테이너 healthy  [app=healthy db=healthy lb= ]
+PASS  SN-02  /health 응답 ok  [{"status":"ok","instance":"a2c6aea7a6a4","test_mode":true}]
+PASS  SN-03  게임 화면: 규칙·닉네임·시작·던지기 요소  [4/4]
+PASS  SN-04  매치 시작 (유효한 닉네임)  [match id=199]
+PASS  SN-05  던지기 1회 → 라운드 1 기록  [rounds_played=1]
+PASS  SN-06  매치 조회 API = DB  [api=1:0:1 db=1:0:1]
+PASS  SN-07  통계 화면 200, 매치 목록 있음  [stats=200 total=199]
+PASS  SN-08  합계 분포 2개 11행·3개 16행  [2개=11 3개=16]
+PASS  SN-09  닉네임별 전적 응답 (봇 10명 이상)  [players=11]
+PASS  SN-10  처리 log에 방금 라운드가 찍힘  [round processed id=199]
+RESULT pass=10 fail=0
+PASS  SN-11  게임 화면(브라우저) 시작→던지기  [started=true rolling true→false round=1 result=컴퓨터 승리 die1=6]

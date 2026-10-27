@@ -1,0 +1,106 @@
+## 2026-10-27 13:40:36     clean install
+$ docker compose down -v
+ Container dice-duel-qa-generator-1 Stopping 
+ Container dice-duel-qa-generator-1 Stopped 
+ Container dice-duel-qa-generator-1 Removing 
+ Container dice-duel-qa-generator-1 Removed 
+ Container dice-duel-qa-lb-1 Stopping 
+ Container dice-duel-qa-lb-1 Stopped 
+ Container dice-duel-qa-lb-1 Removing 
+ Container dice-duel-qa-lb-1 Removed 
+ Container dice-duel-qa-app-1 Stopping 
+ Container dice-duel-qa-app-1 Stopped 
+ Container dice-duel-qa-app-1 Removing 
+ Container dice-duel-qa-app-1 Removed 
+ Container dice-duel-qa-db-1 Stopping 
+ Container dice-duel-qa-db-1 Stopped 
+ Container dice-duel-qa-db-1 Removing 
+ Container dice-duel-qa-db-1 Removed 
+ Volume dice-duel-qa_pgdata Removing 
+ Network dice-duel-qa_default Removing 
+ Volume dice-duel-qa_pgdata Removed 
+ Network dice-duel-qa_default Removed 
+
+$ docker compose up -d --build
+ Image dice-duel-qa-app Building 
+ Image dice-duel-qa-generator Building 
+ Image dice-duel-qa-app Built 
+ Image dice-duel-qa-generator Built 
+ Network dice-duel-qa_default Creating 
+ Volume dice-duel-qa_pgdata Creating 
+ Volume dice-duel-qa_pgdata Creating 
+ Network dice-duel-qa_default Creating 
+ Volume dice-duel-qa_pgdata Created 
+ Volume dice-duel-qa_pgdata Created 
+ Network dice-duel-qa_default Created 
+ Network dice-duel-qa_default Created 
+ Container dice-duel-qa-db-1 Creating 
+ Container dice-duel-qa-db-1 Created 
+ Container dice-duel-qa-app-1 Creating 
+ Container dice-duel-qa-app-1 Created 
+ Container dice-duel-qa-lb-1 Creating 
+ Container dice-duel-qa-lb-1 Created 
+ Container dice-duel-qa-generator-1 Creating 
+ Container dice-duel-qa-generator-1 Created 
+ Container dice-duel-qa-db-1 Starting 
+ Container dice-duel-qa-db-1 Started 
+ Container dice-duel-qa-db-1 Waiting 
+ Container dice-duel-qa-db-1 Healthy 
+ Container dice-duel-qa-app-1 Starting 
+ Container dice-duel-qa-app-1 Started 
+ Container dice-duel-qa-app-1 Waiting 
+ Container dice-duel-qa-app-1 Healthy 
+ Container dice-duel-qa-lb-1 Starting 
+ Container dice-duel-qa-lb-1 Started 
+ Container dice-duel-qa-generator-1 Starting 
+ Container dice-duel-qa-generator-1 Started 
+(elapsed: 19s)
+
+## post-install checks
+$ docker compose ps -a
+SERVICE     IMAGE                    STATUS                      PORTS
+app         dice-duel-qa-app         Up 32 seconds (healthy)     8000/tcp
+db          postgres:16              Up 36 seconds (healthy)     0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp
+generator   dice-duel-qa-generator   Exited (0) 23 seconds ago   
+lb          nginx:1.27-alpine        Up 28 seconds               0.0.0.0:8080->80/tcp, [::]:8080->80/tcp
+
+$ curl -s http://localhost:8080/health
+{"status":"ok","instance":"a2c6aea7a6a4","test_mode":true}
+
+$ docker compose logs generator (summary)
+{
+  "matches": 200,
+  "concurrency": 1,
+  "requests": 1074,
+  "elapsed_sec": 4.6,
+  "throughput_rps": 233.4,
+  "latency_ms": {
+    "avg": 4.2,
+    "p95": 4.8,
+    "max": 14.6
+  },
+  "status_counts": {
+    "200": 1065,
+    "400": 2,
+    "409": 7
+  },
+  "instance_counts": {
+    "a2c6aea7a6a4": 1074
+  }
+}
+$ docker compose exec db psql -U dice -d dice -c "select count(*) ..."
+ matches | in_progress | players | first_day  |  last_day  
+---------+-------------+---------+------------+------------
+     198 |           3 |      10 | 2026-10-20 | 2026-10-27
+(1 row)
+
+$ curl -s -o /dev/null -w "%{http_code}" (pages)
+/ -> 200
+/stats -> 200
+/docs -> 200
+
+$ docker compose restart (data persistence)
+ Container dice-duel-qa-app-1 Started 
+ Container dice-duel-qa-generator-1 Started 
+이미 데이터가 있어 생성을 건너뜁니다.
+matches after restart: 198
