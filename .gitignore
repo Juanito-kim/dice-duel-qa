@@ -19,3 +19,6 @@ perf/raw/
 logs/
 monitoring/collected/
 *.log
+
+# 포트폴리오 검토용 내부 자료
+portfolio-review.md
